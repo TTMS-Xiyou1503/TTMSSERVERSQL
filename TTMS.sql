@@ -12,8 +12,38 @@
  Target Server Version : 13004001
  File Encoding         : utf-8
 
- Date: 05/19/2017 12:53:43 PM
+ Date: 05/19/2017 16:44:49 PM
 */
+
+-- ----------------------------
+--  Table structure for Goods
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[Goods]') AND type IN ('U'))
+	DROP TABLE [dbo].[Goods]
+GO
+CREATE TABLE [dbo].[Goods] (
+	[Id] int IDENTITY(1,1) NOT NULL,
+	[proID] int NOT NULL,
+	[theaterID] int NOT NULL,
+	[performance] nvarchar(10) COLLATE Chinese_PRC_CI_AS NOT NULL DEFAULT (N'早一'),
+	[playdate] date NOT NULL DEFAULT ('1-1-2017'),
+	[price] money NOT NULL DEFAULT ('0')
+)
+GO
+EXEC sp_addextendedproperty 'MS_Description', N'商品表', 'SCHEMA', 'dbo', 'TABLE', 'Goods'
+GO
+EXEC sp_addextendedproperty 'MS_Description', N'商品ID', 'SCHEMA', 'dbo', 'TABLE', 'Goods', 'COLUMN', 'Id'
+GO
+EXEC sp_addextendedproperty 'MS_Description', N'剧目ID', 'SCHEMA', 'dbo', 'TABLE', 'Goods', 'COLUMN', 'proID'
+GO
+EXEC sp_addextendedproperty 'MS_Description', N'放映厅ID', 'SCHEMA', 'dbo', 'TABLE', 'Goods', 'COLUMN', 'theaterID'
+GO
+EXEC sp_addextendedproperty 'MS_Description', N'场次', 'SCHEMA', 'dbo', 'TABLE', 'Goods', 'COLUMN', 'performance'
+GO
+EXEC sp_addextendedproperty 'MS_Description', N'播放日期', 'SCHEMA', 'dbo', 'TABLE', 'Goods', 'COLUMN', 'playdate'
+GO
+EXEC sp_addextendedproperty 'MS_Description', N'价格', 'SCHEMA', 'dbo', 'TABLE', 'Goods', 'COLUMN', 'price'
+GO
 
 -- ----------------------------
 --  Table structure for Orders
@@ -46,51 +76,42 @@ EXEC sp_addextendedproperty 'MS_Description', N'完成此订单的放映厅ID', 
 GO
 
 -- ----------------------------
---  Table structure for Repertoires
+--  Table structure for Programme
 -- ----------------------------
-IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[Repertoires]') AND type IN ('U'))
-	DROP TABLE [dbo].[Repertoires]
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[Programme]') AND type IN ('U'))
+	DROP TABLE [dbo].[Programme]
 GO
-CREATE TABLE [dbo].[Repertoires] (
+CREATE TABLE [dbo].[Programme] (
 	[Id] int IDENTITY(1,1) NOT NULL,
 	[repName] nvarchar(50) COLLATE Chinese_PRC_CI_AS NOT NULL DEFAULT (N'未知'),
-	[theaterID] int NOT NULL,
 	[duration] int NOT NULL,
 	[tags] nvarchar(20) COLLATE Chinese_PRC_CI_AS NULL,
-	[profile] text COLLATE Chinese_PRC_CI_AS NULL DEFAULT (N'无简介'),
-	[startTime] datetime NOT NULL,
-	[endTime] datetime NOT NULL
+	[profile] text COLLATE Chinese_PRC_CI_AS NULL DEFAULT (N'无简介')
 )
 GO
-EXEC sp_addextendedproperty 'MS_Description', N'剧目表', 'SCHEMA', 'dbo', 'TABLE', 'Repertoires'
+EXEC sp_addextendedproperty 'MS_Description', N'剧目表', 'SCHEMA', 'dbo', 'TABLE', 'Programme'
 GO
-EXEC sp_addextendedproperty 'MS_Description', N'剧目ID', 'SCHEMA', 'dbo', 'TABLE', 'Repertoires', 'COLUMN', 'Id'
+EXEC sp_addextendedproperty 'MS_Description', N'剧目ID', 'SCHEMA', 'dbo', 'TABLE', 'Programme', 'COLUMN', 'Id'
 GO
-EXEC sp_addextendedproperty 'MS_Description', N'剧目名称', 'SCHEMA', 'dbo', 'TABLE', 'Repertoires', 'COLUMN', 'repName'
+EXEC sp_addextendedproperty 'MS_Description', N'剧目名称', 'SCHEMA', 'dbo', 'TABLE', 'Programme', 'COLUMN', 'repName'
 GO
-EXEC sp_addextendedproperty 'MS_Description', N'此剧目在哪个影厅上映', 'SCHEMA', 'dbo', 'TABLE', 'Repertoires', 'COLUMN', 'theaterID'
+EXEC sp_addextendedproperty 'MS_Description', N'剧目时长(分钟)', 'SCHEMA', 'dbo', 'TABLE', 'Programme', 'COLUMN', 'duration'
 GO
-EXEC sp_addextendedproperty 'MS_Description', N'剧目时长(分钟)', 'SCHEMA', 'dbo', 'TABLE', 'Repertoires', 'COLUMN', 'duration'
+EXEC sp_addextendedproperty 'MS_Description', N'剧目标签', 'SCHEMA', 'dbo', 'TABLE', 'Programme', 'COLUMN', 'tags'
 GO
-EXEC sp_addextendedproperty 'MS_Description', N'剧目标签', 'SCHEMA', 'dbo', 'TABLE', 'Repertoires', 'COLUMN', 'tags'
-GO
-EXEC sp_addextendedproperty 'MS_Description', N'剧目简介', 'SCHEMA', 'dbo', 'TABLE', 'Repertoires', 'COLUMN', 'profile'
-GO
-EXEC sp_addextendedproperty 'MS_Description', N'开始放映时间', 'SCHEMA', 'dbo', 'TABLE', 'Repertoires', 'COLUMN', 'startTime'
-GO
-EXEC sp_addextendedproperty 'MS_Description', N'放映结束时间', 'SCHEMA', 'dbo', 'TABLE', 'Repertoires', 'COLUMN', 'endTime'
+EXEC sp_addextendedproperty 'MS_Description', N'剧目简介', 'SCHEMA', 'dbo', 'TABLE', 'Programme', 'COLUMN', 'profile'
 GO
 
 -- ----------------------------
---  Records of Repertoires
+--  Records of Programme
 -- ----------------------------
 BEGIN TRANSACTION
 GO
-SET IDENTITY_INSERT [dbo].[Repertoires] ON
+SET IDENTITY_INSERT [dbo].[Programme] ON
 GO
-INSERT INTO [dbo].[Repertoires] ([Id], [repName], [theaterID], [duration], [tags], [profile], [startTime], [endTime]) VALUES ('7', N'一只狗的使命', '2', '120', N'宠物', N'一只狗的使命', '2017-05-23 12:38:00.000', '2017-05-23 14:18:00.000');
+INSERT INTO [dbo].[Programme] ([Id], [repName], [duration], [tags], [profile]) VALUES ('7', N'一只狗的使命', '120', N'宠物', N'一只狗的使命');
 GO
-SET IDENTITY_INSERT [dbo].[Repertoires] OFF
+SET IDENTITY_INSERT [dbo].[Programme] OFF
 GO
 COMMIT
 GO
@@ -192,10 +213,10 @@ IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[Tic
 GO
 CREATE TABLE [dbo].[Tickets] (
 	[Id] int IDENTITY(1,1) NOT NULL,
-	[repID] int NOT NULL,
 	[price] money NOT NULL,
 	[status] int NOT NULL DEFAULT ((0)),
-	[seatID] int NOT NULL
+	[seatID] int NOT NULL,
+	[goodID] int NOT NULL
 )
 GO
 EXEC sp_addextendedproperty 'MS_Description', N'影票表', 'SCHEMA', 'dbo', 'TABLE', 'Tickets'
@@ -205,6 +226,8 @@ GO
 EXEC sp_addextendedproperty 'MS_Description', N'票状态', 'SCHEMA', 'dbo', 'TABLE', 'Tickets', 'COLUMN', 'status'
 GO
 EXEC sp_addextendedproperty 'MS_Description', N'座位ID', 'SCHEMA', 'dbo', 'TABLE', 'Tickets', 'COLUMN', 'seatID'
+GO
+EXEC sp_addextendedproperty 'MS_Description', N'商品ID', 'SCHEMA', 'dbo', 'TABLE', 'Tickets', 'COLUMN', 'goodID'
 GO
 
 -- ----------------------------
@@ -226,13 +249,13 @@ GO
 -- ----------------------------
 BEGIN TRANSACTION
 GO
-INSERT INTO [dbo].[UserIPs] VALUES ('0.0.0.1', '415');
-INSERT INTO [dbo].[UserIPs] VALUES ('111.20.21.85', '500');
-INSERT INTO [dbo].[UserIPs] VALUES ('115.239.212.132', '500');
-INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.111', '500');
-INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.116', '490');
-INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.41', '500');
-INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.63', '499');
+INSERT INTO [dbo].[UserIPs] VALUES ('0.0.0.1', '-1');
+INSERT INTO [dbo].[UserIPs] VALUES ('111.20.21.85', '-1');
+INSERT INTO [dbo].[UserIPs] VALUES ('115.239.212.132', '-1');
+INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.111', '-1');
+INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.116', '-1');
+INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.41', '-1');
+INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.63', '-1');
 GO
 COMMIT
 GO
@@ -566,46 +589,37 @@ end
 GO
 
 -- ----------------------------
---  Procedure structure for sp_CreateRepertoires
+--  Procedure structure for sp_CreatePerformance
 -- ----------------------------
-IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_CreateRepertoires]') AND type IN ('P', 'PC', 'RF', 'X'))
-	DROP PROCEDURE [dbo].[sp_CreateRepertoires]
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_CreatePerformance]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_CreatePerformance]
 GO
-CREATE PROCEDURE [dbo].[sp_CreateRepertoires] 
-@repName nvarchar(50) , @theaterID INT , @duration INT , @tags nvarchar(20) , @profile TEXT , @startTime datetime , @endTime datetime ,
+CREATE PROCEDURE [dbo].[sp_CreatePerformance] 
+@repName nvarchar(50) , @duration INT , @tags nvarchar(20) , @profile TEXT ,
 @message nvarchar(30) OUTPUT
-AS	
-IF EXISTS(SELECT 1 FROM dbo.Theaters WHERE Theaters.Id = @theaterID)
+AS
+IF NOT EXISTS(SELECT 1 FROM dbo.Repertoires WHERE repName = @repName)
 BEGIN
-	IF NOT EXISTS(SELECT 1 FROM dbo.Repertoires WHERE repName = @repName)
-	BEGIN
-		BEGIN TRY
-			INSERT INTO Repertoires 
-				(repName , theaterID , duration , tags , profile , startTime , endTime)
-				VALUES(
-				@repName , @theaterID , @duration , @tags , @profile , @startTime , @endTime
-			)
+	BEGIN TRY
+		INSERT INTO Repertoires 
+			(repName , duration , tags , profile)
+			VALUES
+			(@repName , @duration , @tags , @profile)
 		SET @message = 'created successful'
 		RETURN 200
-		END TRY
-		BEGIN CATCH
-			SELECT ERROR_MESSAGE()
-			RETURN ERROR_MESSAGE() --其他错误
-		END CATCH
-	END
-	ELSE
-	BEGIN 
-		SET @message = 'the repertoires is exists'
-		RETURN 400 --名称已存在
-	END
+	END TRY
+	BEGIN CATCH
+		SELECT ERROR_MESSAGE()
+		RETURN ERROR_NUMBER() --其他错误
+	END CATCH
 END
 ELSE
-BEGIN
-	SET @message = 'theater id is not exists'
-	RETURN 404 --未找到
+BEGIN 
+	SET @message = 'the repertoires is exists'
+	RETURN 400 --名称已存在
 END
 GO
-IF ((SELECT COUNT(*) FROM ::fn_listextendedproperty('MS_Description', 'schema', 'dbo', 'PROCEDURE', 'sp_CreateRepertoires', NULL, NULL)) > 0) EXEC sp_updateextendedproperty 'MS_Description', N'增加一个新的剧目', 'schema', 'dbo', 'PROCEDURE', 'sp_CreateRepertoires' ELSE EXEC sp_addextendedproperty 'MS_Description', N'增加一个新的剧目', 'schema', 'dbo', 'PROCEDURE', 'sp_CreateRepertoires'
+IF ((SELECT COUNT(*) FROM ::fn_listextendedproperty('MS_Description', 'schema', 'dbo', 'PROCEDURE', 'sp_CreatePerformance', NULL, NULL)) > 0) EXEC sp_updateextendedproperty 'MS_Description', N'增加一个新的剧目', 'schema', 'dbo', 'PROCEDURE', 'sp_CreatePerformance' ELSE EXEC sp_addextendedproperty 'MS_Description', N'增加一个新的剧目', 'schema', 'dbo', 'PROCEDURE', 'sp_CreatePerformance'
 GO
 
 -- ----------------------------
@@ -688,6 +702,66 @@ BEGIN
 END
 GO
 
+-- ----------------------------
+--  Procedure structure for sp_CreateGood
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_CreateGood]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_CreateGood]
+GO
+CREATE PROCEDURE [dbo].[sp_CreateGood] 
+	@proId INT , @theaterId INT , @performance nvarchar(10), @playDate DATE , @price MONEY ,
+	@message VARCHAR(30) OUTPUT
+AS
+IF(@performance NOT IN (N'早一',N'早二',N'午一',N'午二',N'晚一',N'晚二',N'午夜'))
+BEGIN
+	SET @message = 'invail performance'
+	RETURN 400
+END
+ELSE
+BEGIN
+	IF EXISTS(SELECT 1 FROM dbo.Theaters WHERE Theaters.Id = @theaterID)
+	BEGIN
+		IF EXISTS(SELECT 1 FROM dbo.Programme WHERE Programme.Id = @proID)
+		BEGIN
+			BEGIN TRY
+				INSERT INTO Goods (proId , theaterId , performance , playDate , price)
+				VALUES
+				(@proId , @theaterId , @performance , @playDate , @price)
+				SET @message = 'created successful'
+				RETURN 200
+			END TRY
+			BEGIN CATCH
+				SET @message = ERROR_MESSAGE()
+				RETURN ERROR_NUMBER()
+			END CATCH
+		END
+		ELSE
+		BEGIN
+			SET @message = 'programme is not exists'
+		RETURN 404 --未找到
+		END
+	END
+	ELSE
+	BEGIN
+		SET @message = 'theater is not exists'
+		RETURN 404 --未找到
+	END
+END
+GO
+IF ((SELECT COUNT(*) FROM ::fn_listextendedproperty('MS_Description', 'schema', 'dbo', 'PROCEDURE', 'sp_CreateGood', NULL, NULL)) > 0) EXEC sp_updateextendedproperty 'MS_Description', N'上架节目', 'schema', 'dbo', 'PROCEDURE', 'sp_CreateGood' ELSE EXEC sp_addextendedproperty 'MS_Description', N'上架节目', 'schema', 'dbo', 'PROCEDURE', 'sp_CreateGood'
+GO
+
+
+-- ----------------------------
+--  Primary key structure for table Goods
+-- ----------------------------
+ALTER TABLE [dbo].[Goods] ADD
+	CONSTRAINT [PK__Goods__3214EC072B9D4BF1] PRIMARY KEY CLUSTERED ([Id]) 
+	WITH (PAD_INDEX = OFF,
+		IGNORE_DUP_KEY = OFF,
+		ALLOW_ROW_LOCKS = ON,
+		ALLOW_PAGE_LOCKS = ON)
+GO
 
 -- ----------------------------
 --  Primary key structure for table Orders
@@ -724,9 +798,9 @@ EXEC sp_addextendedproperty 'MS_Description', N'订单索引', 'SCHEMA', 'dbo', 
 GO
 
 -- ----------------------------
---  Primary key structure for table Repertoires
+--  Primary key structure for table Programme
 -- ----------------------------
-ALTER TABLE [dbo].[Repertoires] ADD
+ALTER TABLE [dbo].[Programme] ADD
 	CONSTRAINT [PK__Repertoi__3214EC07BD0E06D7] PRIMARY KEY CLUSTERED ([Id]) 
 	WITH (PAD_INDEX = OFF,
 		IGNORE_DUP_KEY = OFF,
@@ -837,8 +911,8 @@ GO
 -- ----------------------------
 --  Indexes structure for table Tickets
 -- ----------------------------
-CREATE NONCLUSTERED INDEX [index_repid]
-ON [dbo].[Tickets] ([repID] ASC)
+CREATE NONCLUSTERED INDEX [index_goodId]
+ON [dbo].[Tickets] ([goodID] ASC)
 WITH (PAD_INDEX = OFF,
 	IGNORE_DUP_KEY = OFF,
 	STATISTICS_NORECOMPUTE = OFF,
@@ -847,7 +921,7 @@ WITH (PAD_INDEX = OFF,
 	ALLOW_ROW_LOCKS = ON,
 	ALLOW_PAGE_LOCKS = ON)
 GO
-EXEC sp_addextendedproperty 'MS_Description', N'剧目id作为索引', 'SCHEMA', 'dbo', 'TABLE', 'Tickets', 'INDEX', 'index_repid'
+EXEC sp_addextendedproperty 'MS_Description', N'剧目id作为索引', 'SCHEMA', 'dbo', 'TABLE', 'Tickets', 'INDEX', 'index_goodId'
 GO
 
 -- ----------------------------
@@ -881,6 +955,18 @@ ALTER TABLE [dbo].[Users] ADD
 GO
 
 -- ----------------------------
+--  Foreign keys structure for table Goods
+-- ----------------------------
+ALTER TABLE [dbo].[Goods] ADD
+	CONSTRAINT [goods_proId] FOREIGN KEY ([proID]) REFERENCES [dbo].[Programme] ([Id]) ON DELETE NO ACTION ON UPDATE NO ACTION,
+	CONSTRAINT [goods_theaterId] FOREIGN KEY ([theaterID]) REFERENCES [dbo].[Theaters] ([Id]) ON DELETE NO ACTION ON UPDATE NO ACTION
+GO
+EXEC sp_addextendedproperty 'MS_Description', N'节目外键', 'SCHEMA', 'dbo', 'TABLE', 'Goods', 'CONSTRAINT', 'goods_proId'
+GO
+EXEC sp_addextendedproperty 'MS_Description', N'剧院外键', 'SCHEMA', 'dbo', 'TABLE', 'Goods', 'CONSTRAINT', 'goods_theaterId'
+GO
+
+-- ----------------------------
 --  Foreign keys structure for table Orders
 -- ----------------------------
 ALTER TABLE [dbo].[Orders] ADD
@@ -893,13 +979,6 @@ GO
 EXEC sp_addextendedproperty 'MS_Description', N'放映厅ID作为外键', 'SCHEMA', 'dbo', 'TABLE', 'Orders', 'CONSTRAINT', 'order_theaterID'
 GO
 EXEC sp_addextendedproperty 'MS_Description', N'票ID作为外键', 'SCHEMA', 'dbo', 'TABLE', 'Orders', 'CONSTRAINT', 'order_ticketID'
-GO
-
--- ----------------------------
---  Foreign keys structure for table Repertoires
--- ----------------------------
-ALTER TABLE [dbo].[Repertoires] ADD
-	CONSTRAINT [theaterIDRep] FOREIGN KEY ([theaterID]) REFERENCES [dbo].[Theaters] ([Id]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
 
 -- ----------------------------
@@ -924,12 +1003,18 @@ GO
 --  Foreign keys structure for table Tickets
 -- ----------------------------
 ALTER TABLE [dbo].[Tickets] ADD
-	CONSTRAINT [repIDticket] FOREIGN KEY ([repID]) REFERENCES [dbo].[Repertoires] ([Id]) ON DELETE NO ACTION ON UPDATE NO ACTION,
-	CONSTRAINT [seatIDticket] FOREIGN KEY ([seatID]) REFERENCES [dbo].[Seats] ([Id]) ON DELETE NO ACTION ON UPDATE NO ACTION
+	CONSTRAINT [tic_seatId] FOREIGN KEY ([seatID]) REFERENCES [dbo].[Seats] ([Id]) ON DELETE NO ACTION ON UPDATE NO ACTION,
+	CONSTRAINT [tic_goodId] FOREIGN KEY ([goodID]) REFERENCES [dbo].[Goods] ([Id]) ON DELETE NO ACTION ON UPDATE NO ACTION
 GO
-EXEC sp_addextendedproperty 'MS_Description', N'剧目信息作为外键', 'SCHEMA', 'dbo', 'TABLE', 'Tickets', 'CONSTRAINT', 'repIDticket'
+EXEC sp_addextendedproperty 'MS_Description', N'使用座位ID来作为外键', 'SCHEMA', 'dbo', 'TABLE', 'Tickets', 'CONSTRAINT', 'tic_seatId'
 GO
-EXEC sp_addextendedproperty 'MS_Description', N'使用座位ID来作为外键', 'SCHEMA', 'dbo', 'TABLE', 'Tickets', 'CONSTRAINT', 'seatIDticket'
+
+-- ----------------------------
+--  Options for table Goods
+-- ----------------------------
+ALTER TABLE [dbo].[Goods] SET (LOCK_ESCALATION = TABLE)
+GO
+DBCC CHECKIDENT ('[dbo].[Goods]', RESEED, 1)
 GO
 
 -- ----------------------------
@@ -941,11 +1026,11 @@ DBCC CHECKIDENT ('[dbo].[Orders]', RESEED, 1)
 GO
 
 -- ----------------------------
---  Options for table Repertoires
+--  Options for table Programme
 -- ----------------------------
-ALTER TABLE [dbo].[Repertoires] SET (LOCK_ESCALATION = TABLE)
+ALTER TABLE [dbo].[Programme] SET (LOCK_ESCALATION = TABLE)
 GO
-DBCC CHECKIDENT ('[dbo].[Repertoires]', RESEED, 7)
+DBCC CHECKIDENT ('[dbo].[Programme]', RESEED, 7)
 GO
 
 -- ----------------------------
