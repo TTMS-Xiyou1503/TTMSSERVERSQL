@@ -12,7 +12,7 @@
  Target Server Version : 13004001
  File Encoding         : utf-8
 
- Date: 05/19/2017 23:09:25 PM
+ Date: 05/20/2017 01:19:15 AM
 */
 
 -- ----------------------------
@@ -83,7 +83,7 @@ IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[Pro
 GO
 CREATE TABLE [dbo].[Programme] (
 	[Id] int IDENTITY(1,1) NOT NULL,
-	[repName] nvarchar(50) COLLATE Chinese_PRC_CI_AS NOT NULL DEFAULT (N'未知'),
+	[proName] nvarchar(50) COLLATE Chinese_PRC_CI_AS NOT NULL,
 	[duration] int NOT NULL,
 	[tags] nvarchar(20) COLLATE Chinese_PRC_CI_AS NULL,
 	[profile] text COLLATE Chinese_PRC_CI_AS NULL DEFAULT (N'无简介')
@@ -93,7 +93,7 @@ EXEC sp_addextendedproperty 'MS_Description', N'剧目表', 'SCHEMA', 'dbo', 'TA
 GO
 EXEC sp_addextendedproperty 'MS_Description', N'剧目ID', 'SCHEMA', 'dbo', 'TABLE', 'Programme', 'COLUMN', 'Id'
 GO
-EXEC sp_addextendedproperty 'MS_Description', N'剧目名称', 'SCHEMA', 'dbo', 'TABLE', 'Programme', 'COLUMN', 'repName'
+EXEC sp_addextendedproperty 'MS_Description', N'剧目名称', 'SCHEMA', 'dbo', 'TABLE', 'Programme', 'COLUMN', 'proName'
 GO
 EXEC sp_addextendedproperty 'MS_Description', N'剧目时长(分钟)', 'SCHEMA', 'dbo', 'TABLE', 'Programme', 'COLUMN', 'duration'
 GO
@@ -109,7 +109,7 @@ BEGIN TRANSACTION
 GO
 SET IDENTITY_INSERT [dbo].[Programme] ON
 GO
-INSERT INTO [dbo].[Programme] ([Id], [repName], [duration], [tags], [profile]) VALUES ('7', N'一只狗的使命', '120', N'宠物', N'一只狗的使命');
+INSERT INTO [dbo].[Programme] ([Id], [proName], [duration], [tags], [profile]) VALUES ('7', N'一只狗的使命', '120', N'宠物', N'一只狗的使命');
 GO
 SET IDENTITY_INSERT [dbo].[Programme] OFF
 GO
@@ -123,7 +123,7 @@ IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[Sea
 	DROP TABLE [dbo].[Seats]
 GO
 CREATE TABLE [dbo].[Seats] (
-	[Id] int IDENTITY(1,1) NOT NULL,
+	[Id] int IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
 	[theaterID] int NOT NULL,
 	[status] bit NOT NULL DEFAULT ((1)),
 	[rowNumber] int NOT NULL DEFAULT ((1)),
@@ -152,6 +152,204 @@ GO
 SET IDENTITY_INSERT [dbo].[Seats] ON
 GO
 INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('23', '2', '1', '10', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('113', '8', '1', '1', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('114', '8', '1', '1', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('115', '8', '1', '1', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('116', '8', '1', '1', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('117', '8', '1', '1', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('118', '8', '1', '1', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('119', '8', '1', '1', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('120', '8', '1', '1', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('121', '8', '1', '1', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('122', '8', '1', '2', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('123', '8', '1', '2', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('124', '8', '1', '2', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('125', '8', '1', '2', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('126', '8', '1', '2', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('127', '8', '1', '2', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('128', '8', '1', '2', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('129', '8', '1', '2', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('130', '8', '1', '2', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('131', '8', '1', '2', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('132', '8', '1', '3', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('133', '8', '1', '3', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('134', '8', '1', '3', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('135', '8', '1', '3', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('136', '8', '1', '3', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('137', '8', '1', '3', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('138', '8', '1', '3', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('139', '8', '1', '3', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('140', '8', '1', '3', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('141', '8', '1', '3', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('142', '8', '1', '4', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('143', '8', '1', '4', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('144', '8', '1', '4', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('145', '8', '1', '4', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('146', '8', '1', '4', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('147', '8', '1', '4', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('148', '8', '1', '4', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('149', '8', '1', '4', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('150', '8', '1', '4', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('151', '8', '1', '4', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('152', '8', '1', '5', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('153', '8', '1', '5', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('154', '8', '1', '5', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('155', '8', '1', '5', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('156', '8', '1', '5', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('157', '8', '1', '5', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('158', '8', '1', '5', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('159', '8', '1', '5', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('160', '8', '1', '5', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('161', '8', '1', '5', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('162', '8', '1', '6', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('163', '8', '1', '6', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('164', '8', '1', '6', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('165', '8', '1', '6', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('166', '8', '1', '6', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('167', '8', '1', '6', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('168', '8', '1', '6', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('169', '8', '1', '6', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('170', '8', '1', '6', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('171', '8', '1', '6', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('172', '8', '1', '7', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('173', '8', '1', '7', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('174', '8', '1', '7', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('175', '8', '1', '7', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('176', '8', '1', '7', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('177', '8', '1', '7', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('178', '8', '1', '7', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('179', '8', '1', '7', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('180', '8', '1', '7', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('181', '8', '1', '7', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('182', '8', '1', '8', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('183', '8', '1', '8', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('184', '8', '1', '8', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('185', '8', '1', '8', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('186', '8', '1', '8', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('187', '8', '1', '8', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('188', '8', '1', '8', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('189', '8', '1', '8', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('190', '8', '1', '8', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('191', '8', '1', '8', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('192', '8', '1', '9', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('193', '8', '1', '9', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('194', '8', '1', '9', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('195', '8', '1', '9', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('196', '8', '1', '9', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('197', '8', '1', '9', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('198', '8', '1', '9', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('199', '8', '1', '9', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('200', '8', '1', '9', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('201', '8', '1', '9', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('202', '8', '1', '10', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('203', '8', '1', '10', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('204', '8', '1', '10', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('205', '8', '1', '10', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('206', '8', '1', '10', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('207', '8', '1', '10', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('208', '8', '1', '10', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('209', '8', '1', '10', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('210', '8', '1', '10', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('211', '8', '1', '10', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('212', '9', '1', '1', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('213', '9', '1', '1', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('214', '9', '1', '1', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('215', '9', '1', '1', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('216', '9', '1', '1', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('217', '9', '1', '1', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('218', '9', '1', '1', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('219', '9', '1', '1', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('220', '9', '1', '1', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('221', '9', '1', '2', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('222', '9', '1', '2', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('223', '9', '1', '2', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('224', '9', '1', '2', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('225', '9', '1', '2', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('226', '9', '1', '2', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('227', '9', '1', '2', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('228', '9', '1', '2', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('229', '9', '1', '2', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('230', '9', '1', '2', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('231', '9', '1', '3', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('232', '9', '1', '3', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('233', '9', '1', '3', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('234', '9', '1', '3', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('235', '9', '1', '3', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('236', '9', '1', '3', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('237', '9', '1', '3', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('238', '9', '1', '3', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('239', '9', '1', '3', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('240', '9', '1', '3', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('241', '9', '1', '4', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('242', '9', '1', '4', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('243', '9', '1', '4', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('244', '9', '1', '4', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('245', '9', '1', '4', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('246', '9', '1', '4', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('247', '9', '1', '4', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('248', '9', '1', '4', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('249', '9', '1', '4', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('250', '9', '1', '4', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('251', '9', '1', '5', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('252', '9', '1', '5', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('253', '9', '1', '5', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('254', '9', '1', '5', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('255', '9', '1', '5', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('256', '9', '1', '5', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('257', '9', '1', '5', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('258', '9', '1', '5', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('259', '9', '1', '5', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('260', '9', '1', '5', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('261', '9', '1', '6', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('262', '9', '1', '6', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('263', '9', '1', '6', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('264', '9', '1', '6', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('265', '9', '1', '6', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('266', '9', '1', '6', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('267', '9', '1', '6', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('268', '9', '1', '6', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('269', '9', '1', '6', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('270', '9', '1', '6', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('271', '9', '1', '7', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('272', '9', '1', '7', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('273', '9', '1', '7', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('274', '9', '1', '7', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('275', '9', '1', '7', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('276', '9', '1', '7', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('277', '9', '1', '7', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('278', '9', '1', '7', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('279', '9', '1', '7', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('280', '9', '1', '7', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('281', '9', '1', '8', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('282', '9', '1', '8', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('283', '9', '1', '8', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('284', '9', '1', '8', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('285', '9', '1', '8', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('286', '9', '1', '8', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('287', '9', '1', '8', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('288', '9', '1', '8', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('289', '9', '1', '8', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('290', '9', '1', '8', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('291', '9', '1', '9', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('292', '9', '1', '9', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('293', '9', '1', '9', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('294', '9', '1', '9', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('295', '9', '1', '9', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('296', '9', '1', '9', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('297', '9', '1', '9', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('298', '9', '1', '9', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('299', '9', '1', '9', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('300', '9', '1', '9', '10');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('301', '9', '1', '10', '1');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('302', '9', '1', '10', '2');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('303', '9', '1', '10', '3');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('304', '9', '1', '10', '4');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('305', '9', '1', '10', '5');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('306', '9', '1', '10', '6');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('307', '9', '1', '10', '7');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('308', '9', '1', '10', '8');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('309', '9', '1', '10', '9');
+INSERT INTO [dbo].[Seats] ([Id], [theaterID], [status], [rowNumber], [colNumber]) VALUES ('310', '9', '1', '10', '10');
 GO
 SET IDENTITY_INSERT [dbo].[Seats] OFF
 GO
@@ -169,7 +367,7 @@ CREATE TABLE [dbo].[Theaters] (
 	[theaterName] nvarchar(30) COLLATE Chinese_Simplified_Pinyin_100_BIN NOT NULL DEFAULT (N'影厅'),
 	[theaterLocation] nvarchar(30) COLLATE Chinese_PRC_CI_AS NOT NULL DEFAULT (N'中国'),
 	[theaterMapSite] nvarchar(30) COLLATE Chinese_PRC_CI_AS NULL DEFAULT ('https://gaode.com'),
-	[theaterAdminID] int NOT NULL DEFAULT ((1)),
+	[theaterAdminID] int NULL,
 	[seatRowCount] int NOT NULL DEFAULT ((0)),
 	[seatColCount] int NOT NULL DEFAULT ((0))
 )
@@ -199,6 +397,8 @@ GO
 SET IDENTITY_INSERT [dbo].[Theaters] ON
 GO
 INSERT INTO [dbo].[Theaters] ([Id], [theaterName], [theaterLocation], [theaterMapSite], [theaterAdminID], [seatRowCount], [seatColCount]) VALUES ('2', N'西邮1号放映厅', N'西安邮电大学', 'gaode.com', '2', '10', '10');
+INSERT INTO [dbo].[Theaters] ([Id], [theaterName], [theaterLocation], [theaterMapSite], [theaterAdminID], [seatRowCount], [seatColCount]) VALUES ('8', 'string', 'string', 'string', '2', '10', '10');
+INSERT INTO [dbo].[Theaters] ([Id], [theaterName], [theaterLocation], [theaterMapSite], [theaterAdminID], [seatRowCount], [seatColCount]) VALUES ('9', 'string1', 'string', 'string', '2', '10', '10');
 GO
 SET IDENTITY_INSERT [dbo].[Theaters] OFF
 GO
@@ -250,12 +450,15 @@ GO
 BEGIN TRANSACTION
 GO
 INSERT INTO [dbo].[UserIPs] VALUES ('0.0.0.1', '-1');
+INSERT INTO [dbo].[UserIPs] VALUES ('111.20.21.63', '496');
 INSERT INTO [dbo].[UserIPs] VALUES ('111.20.21.85', '-1');
 INSERT INTO [dbo].[UserIPs] VALUES ('115.239.212.132', '-1');
 INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.111', '-1');
 INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.116', '-1');
+INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.25', '498');
 INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.41', '-1');
 INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.63', '-1');
+INSERT INTO [dbo].[UserIPs] VALUES ('221.11.61.134', '499');
 GO
 COMMIT
 GO
@@ -875,6 +1078,35 @@ END CATCH
 
 GO
 
+-- ----------------------------
+--  Procedure structure for sp_DeleteSeat
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_DeleteSeat]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_DeleteSeat]
+GO
+CREATE PROCEDURE [dbo].[sp_DeleteSeat] 
+	@seatId INT , 
+	@message varchar(30) OUTPUT
+AS
+if exists(select 1 from Seats where Id = @seatId)
+begin
+	begin try
+		DELETE Seats where Id = @seatId
+		set @message = 'successful'
+		return 204
+	end try
+	begin catch
+		set @message = ERROR_MESSAGE()
+		return ERROR_NUMBER()
+	end catch
+end
+else
+begin
+	set @message = 'the seat is not exists'
+	return 404
+end
+GO
+
 
 -- ----------------------------
 --  Primary key structure for table Goods
@@ -956,22 +1188,6 @@ EXEC sp_addextendedproperty 'MS_Description', N'行数大于0
 GO
 
 -- ----------------------------
---  Indexes structure for table Seats
--- ----------------------------
-CREATE NONCLUSTERED INDEX [theaterID]
-ON [dbo].[Seats] ([theaterID] ASC)
-WITH (PAD_INDEX = OFF,
-	IGNORE_DUP_KEY = OFF,
-	STATISTICS_NORECOMPUTE = OFF,
-	SORT_IN_TEMPDB = OFF,
-	ONLINE = OFF,
-	ALLOW_ROW_LOCKS = ON,
-	ALLOW_PAGE_LOCKS = ON)
-GO
-EXEC sp_addextendedproperty 'MS_Description', N'用放映厅ID作为索引', 'SCHEMA', 'dbo', 'TABLE', 'Seats', 'INDEX', 'theaterID'
-GO
-
--- ----------------------------
 --  Primary key structure for table Theaters
 -- ----------------------------
 ALTER TABLE [dbo].[Theaters] ADD
@@ -1011,7 +1227,39 @@ IF(@adminLevel <> N'剧院经理')
 GO
 DISABLE TRIGGER [dbo].[tr_adminLevel] ON [Theaters]
 GO
+CREATE TRIGGER [dbo].[tr_initSeats] ON [dbo].[Theaters]
+WITH EXECUTE AS CALLER
+AFTER INSERT
+AS
+DECLARE @rowCount INT , @colCount INT , @curRowCount INT = 1 , @curColCount INT = 1 , @curCount INT = 1 , @theaterId INT 
+SELECT @rowCount = seatRowCount, @colCount = seatColCount , @theaterId = Id FROM INSERTED
+WHILE(@curCount < @rowCount * @colCount)
+BEGIN
+	IF(@curColCount >= @colCount)
+	BEGIN
+		SET	@curColCount = 1
+		SET @curRowCount = @curRowCount + 1
+	END
+	ELSE
+		SET @curColCount = @curColCount + 1
+	
+	EXEC sp_CreateSeat @theaterId , @curRowCount , @curColCount , 'NULL'
+	SET @curCount = @curCount + 1
+END
+GO
+CREATE TRIGGER [dbo].[tr_dropChild] ON [dbo].[Theaters]
+WITH EXECUTE AS CALLER
+INSTEAD OF DELETE
+AS
+DELETE Goods WHERE Goods.theaterID = (SELECT Id FROM DELETED)
+DELETE Seats WHERE Seats.theaterID = (SELECT Id FROM DELETED)
+DELETE Theaters WHERE Id = (SELECT Id FROM DELETED) 
+GO
 EXEC sp_addextendedproperty 'MS_Description', N'当添加或者修改后管理员职位不是 剧院经理  则不能添加或者修改', 'SCHEMA', 'dbo', 'TABLE', 'Theaters', 'TRIGGER', 'tr_adminLevel'
+GO
+EXEC sp_addextendedproperty 'MS_Description', N'新建放映厅的时候初始化作为列表', 'SCHEMA', 'dbo', 'TABLE', 'Theaters', 'TRIGGER', 'tr_initSeats'
+GO
+EXEC sp_addextendedproperty 'MS_Description', N'删除放映厅的时候删除座位', 'SCHEMA', 'dbo', 'TABLE', 'Theaters', 'TRIGGER', 'tr_dropChild'
 GO
 
 -- ----------------------------
@@ -1082,25 +1330,22 @@ GO
 --  Foreign keys structure for table Goods
 -- ----------------------------
 ALTER TABLE [dbo].[Goods] ADD
-	CONSTRAINT [goods_proId] FOREIGN KEY ([proID]) REFERENCES [dbo].[Programme] ([Id]) ON DELETE NO ACTION ON UPDATE NO ACTION,
-	CONSTRAINT [goods_theaterId] FOREIGN KEY ([theaterID]) REFERENCES [dbo].[Theaters] ([Id]) ON DELETE NO ACTION ON UPDATE NO ACTION
-GO
-EXEC sp_addextendedproperty 'MS_Description', N'节目外键', 'SCHEMA', 'dbo', 'TABLE', 'Goods', 'CONSTRAINT', 'goods_proId'
+	CONSTRAINT [goods_theaterId] FOREIGN KEY ([theaterID]) REFERENCES [dbo].[Theaters] ([Id]) ON DELETE CASCADE ON UPDATE NO ACTION,
+	CONSTRAINT [goods_proId] FOREIGN KEY ([proID]) REFERENCES [dbo].[Programme] ([Id]) ON DELETE CASCADE ON UPDATE NO ACTION
 GO
 EXEC sp_addextendedproperty 'MS_Description', N'剧院外键', 'SCHEMA', 'dbo', 'TABLE', 'Goods', 'CONSTRAINT', 'goods_theaterId'
+GO
+EXEC sp_addextendedproperty 'MS_Description', N'节目外键', 'SCHEMA', 'dbo', 'TABLE', 'Goods', 'CONSTRAINT', 'goods_proId'
 GO
 
 -- ----------------------------
 --  Foreign keys structure for table Orders
 -- ----------------------------
 ALTER TABLE [dbo].[Orders] ADD
-	CONSTRAINT [order_userID] FOREIGN KEY ([userID]) REFERENCES [dbo].[Users] ([Id]) ON DELETE NO ACTION ON UPDATE NO ACTION,
-	CONSTRAINT [order_theaterID] FOREIGN KEY ([theaterID]) REFERENCES [dbo].[Theaters] ([Id]) ON DELETE NO ACTION ON UPDATE NO ACTION,
-	CONSTRAINT [order_ticketID] FOREIGN KEY ([ticketID]) REFERENCES [dbo].[Tickets] ([Id]) ON DELETE NO ACTION ON UPDATE NO ACTION
+	CONSTRAINT [order_userID] FOREIGN KEY ([userID]) REFERENCES [dbo].[Users] ([Id]) ON DELETE CASCADE ON UPDATE NO ACTION,
+	CONSTRAINT [order_ticketID] FOREIGN KEY ([ticketID]) REFERENCES [dbo].[Tickets] ([Id]) ON DELETE CASCADE ON UPDATE NO ACTION
 GO
 EXEC sp_addextendedproperty 'MS_Description', N'用户ID作为外键', 'SCHEMA', 'dbo', 'TABLE', 'Orders', 'CONSTRAINT', 'order_userID'
-GO
-EXEC sp_addextendedproperty 'MS_Description', N'放映厅ID作为外键', 'SCHEMA', 'dbo', 'TABLE', 'Orders', 'CONSTRAINT', 'order_theaterID'
 GO
 EXEC sp_addextendedproperty 'MS_Description', N'票ID作为外键', 'SCHEMA', 'dbo', 'TABLE', 'Orders', 'CONSTRAINT', 'order_ticketID'
 GO
@@ -1109,7 +1354,7 @@ GO
 --  Foreign keys structure for table Seats
 -- ----------------------------
 ALTER TABLE [dbo].[Seats] ADD
-	CONSTRAINT [theaterID] FOREIGN KEY ([theaterID]) REFERENCES [dbo].[Theaters] ([Id]) ON DELETE NO ACTION ON UPDATE NO ACTION
+	CONSTRAINT [theaterID] FOREIGN KEY ([theaterID]) REFERENCES [dbo].[Theaters] ([Id]) ON DELETE NO ACTION ON UPDATE CASCADE
 GO
 EXEC sp_addextendedproperty 'MS_Description', N'放映厅ID作为外键', 'SCHEMA', 'dbo', 'TABLE', 'Seats', 'CONSTRAINT', 'theaterID'
 GO
@@ -1118,7 +1363,7 @@ GO
 --  Foreign keys structure for table Theaters
 -- ----------------------------
 ALTER TABLE [dbo].[Theaters] ADD
-	CONSTRAINT [theaterAdminID] FOREIGN KEY ([theaterAdminID]) REFERENCES [dbo].[Users] ([Id]) ON DELETE NO ACTION ON UPDATE NO ACTION
+	CONSTRAINT [theaterAdminID] FOREIGN KEY ([theaterAdminID]) REFERENCES [dbo].[Users] ([Id]) ON DELETE SET NULL ON UPDATE NO ACTION
 GO
 EXEC sp_addextendedproperty 'MS_Description', N'放映厅管理者', 'SCHEMA', 'dbo', 'TABLE', 'Theaters', 'CONSTRAINT', 'theaterAdminID'
 GO
@@ -1127,8 +1372,8 @@ GO
 --  Foreign keys structure for table Tickets
 -- ----------------------------
 ALTER TABLE [dbo].[Tickets] ADD
-	CONSTRAINT [tic_seatId] FOREIGN KEY ([seatID]) REFERENCES [dbo].[Seats] ([Id]) ON DELETE NO ACTION ON UPDATE NO ACTION,
-	CONSTRAINT [tic_goodId] FOREIGN KEY ([goodID]) REFERENCES [dbo].[Goods] ([Id]) ON DELETE NO ACTION ON UPDATE NO ACTION
+	CONSTRAINT [tic_seatId] FOREIGN KEY ([seatID]) REFERENCES [dbo].[Seats] ([Id]) ON DELETE CASCADE ON UPDATE NO ACTION,
+	CONSTRAINT [tic_goodId] FOREIGN KEY ([goodID]) REFERENCES [dbo].[Goods] ([Id]) ON DELETE CASCADE ON UPDATE NO ACTION
 GO
 EXEC sp_addextendedproperty 'MS_Description', N'使用座位ID来作为外键', 'SCHEMA', 'dbo', 'TABLE', 'Tickets', 'CONSTRAINT', 'tic_seatId'
 GO
@@ -1162,7 +1407,7 @@ GO
 -- ----------------------------
 ALTER TABLE [dbo].[Seats] SET (LOCK_ESCALATION = TABLE)
 GO
-DBCC CHECKIDENT ('[dbo].[Seats]', RESEED, 23)
+DBCC CHECKIDENT ('[dbo].[Seats]', RESEED, 310)
 GO
 
 -- ----------------------------
@@ -1170,7 +1415,7 @@ GO
 -- ----------------------------
 ALTER TABLE [dbo].[Theaters] SET (LOCK_ESCALATION = TABLE)
 GO
-DBCC CHECKIDENT ('[dbo].[Theaters]', RESEED, 3)
+DBCC CHECKIDENT ('[dbo].[Theaters]', RESEED, 7)
 GO
 
 -- ----------------------------
