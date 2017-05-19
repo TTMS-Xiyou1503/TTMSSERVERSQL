@@ -12,7 +12,7 @@
  Target Server Version : 13004001
  File Encoding         : utf-8
 
- Date: 05/18/2017 20:17:26 PM
+ Date: 05/19/2017 12:53:43 PM
 */
 
 -- ----------------------------
@@ -226,10 +226,11 @@ GO
 -- ----------------------------
 BEGIN TRANSACTION
 GO
-INSERT INTO [dbo].[UserIPs] VALUES ('0.0.0.1', '443');
+INSERT INTO [dbo].[UserIPs] VALUES ('0.0.0.1', '415');
 INSERT INTO [dbo].[UserIPs] VALUES ('111.20.21.85', '500');
 INSERT INTO [dbo].[UserIPs] VALUES ('115.239.212.132', '500');
 INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.111', '500');
+INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.116', '490');
 INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.41', '500');
 INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.63', '499');
 GO
@@ -285,7 +286,7 @@ BEGIN TRANSACTION
 GO
 SET IDENTITY_INSERT [dbo].[Users] ON
 GO
-INSERT INTO [dbo].[Users] ([Id], [userName], [userAccount], [userPassword], [signUpTime], [lastSigninTime], [userLevel], [userSex], [userAvatar], [userTel]) VALUES ('2', N'杨帆', 'yangfan', '123456', '2017-05-04 22:47:29.570', '2017-05-04 22:47:49.380', N'剧院经理', N'男', null, '18829076013');
+INSERT INTO [dbo].[Users] ([Id], [userName], [userAccount], [userPassword], [signUpTime], [lastSigninTime], [userLevel], [userSex], [userAvatar], [userTel]) VALUES ('2', N'杨帆', 'yangfan', '123456', '2017-05-04 22:47:29.570', '2017-05-18 21:29:42.300', N'系统管理员', N'男', null, '18829076013');
 INSERT INTO [dbo].[Users] ([Id], [userName], [userAccount], [userPassword], [signUpTime], [lastSigninTime], [userLevel], [userSex], [userAvatar], [userTel]) VALUES ('3', N'杨帆', 'ksgin', 'yf123456', '2017-05-09 17:06:16.247', '2017-05-09 17:06:16.247', N'系统管理员', N'男', null, '18628561591');
 GO
 SET IDENTITY_INSERT [dbo].[Users] OFF
@@ -492,10 +493,21 @@ IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_
 	DROP PROCEDURE [dbo].[sp_GetUser]
 GO
 CREATE PROCEDURE [dbo].[sp_GetUser]   
-@account nvarchar(15)
+@account nvarchar(15),
+@message varchar(30) OUTPUT
 as
-select userName , userAccount , userPassword , signUpTime , lastSigninTime , userLevel , userSex , userAvatar , userTel
-from Users where userAccount = @account
+IF EXISTS(SELECT 1 FROM users WHERE userAccount = @account)
+BEGIN
+	select userName , userAccount , userPassword , signUpTime , lastSigninTime , userLevel , userSex , userAvatar , userTel
+	from Users where userAccount = @account
+	SET @message = 'query successful'
+	RETURN 200
+END
+ELSE
+BEGIN
+	SET @message = 'the user is not exists'
+	RETURN 404
+END
 GO
 
 -- ----------------------------
@@ -645,6 +657,35 @@ END
 
 GO
 IF ((SELECT COUNT(*) FROM ::fn_listextendedproperty('MS_Description', 'schema', 'dbo', 'PROCEDURE', 'sp_CreateSeat', NULL, NULL)) > 0) EXEC sp_updateextendedproperty 'MS_Description', N'创建一个新座位  用于影厅初始化', 'schema', 'dbo', 'PROCEDURE', 'sp_CreateSeat' ELSE EXEC sp_addextendedproperty 'MS_Description', N'创建一个新座位  用于影厅初始化', 'schema', 'dbo', 'PROCEDURE', 'sp_CreateSeat'
+GO
+
+-- ----------------------------
+--  Procedure structure for sp_UpdateSeatStatus
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_UpdateSeatStatus]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_UpdateSeatStatus]
+GO
+CREATE PROCEDURE [dbo].[sp_UpdateSeatStatus] 
+	@seatID INT, @status BIT ,
+	@message VARCHAR(30) OUTPUT
+AS
+IF EXISTS(SELECT 1 FROM Seats WHERE Id = @seatID)
+BEGIN
+	BEGIN TRY
+		UPDATE Seats SET status = @status WHERE Id = @seatID
+		SET @message = 'update successful'
+		RETURN 200
+	END TRY
+	BEGIN CATCH
+		SET @message = ERROR_MESSAGE()
+		RETURN ERROR_NUMBER()
+	END CATCH
+END
+ELSE
+BEGIN
+	SET @message = 'the seat is not exists'
+	RETURN 404
+END
 GO
 
 
