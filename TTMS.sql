@@ -12,7 +12,7 @@
  Target Server Version : 13004001
  File Encoding         : utf-8
 
- Date: 05/19/2017 16:44:49 PM
+ Date: 05/19/2017 23:09:25 PM
 */
 
 -- ----------------------------
@@ -309,8 +309,7 @@ BEGIN TRANSACTION
 GO
 SET IDENTITY_INSERT [dbo].[Users] ON
 GO
-INSERT INTO [dbo].[Users] ([Id], [userName], [userAccount], [userPassword], [signUpTime], [lastSigninTime], [userLevel], [userSex], [userAvatar], [userTel]) VALUES ('2', N'杨帆', 'yangfan', '123456', '2017-05-04 22:47:29.570', '2017-05-18 21:29:42.300', N'系统管理员', N'男', null, '18829076013');
-INSERT INTO [dbo].[Users] ([Id], [userName], [userAccount], [userPassword], [signUpTime], [lastSigninTime], [userLevel], [userSex], [userAvatar], [userTel]) VALUES ('3', N'杨帆', 'ksgin', 'yf123456', '2017-05-09 17:06:16.247', '2017-05-09 17:06:16.247', N'系统管理员', N'男', null, '18628561591');
+INSERT INTO [dbo].[Users] ([Id], [userName], [userAccount], [userPassword], [signUpTime], [lastSigninTime], [userLevel], [userSex], [userAvatar], [userTel]) VALUES ('2', N'杨帆', 'yangfan', 'string', '2017-05-04 22:47:29.570', '2017-05-18 21:29:42.300', N'系统管理员', N'男', null, '18829076013');
 GO
 SET IDENTITY_INSERT [dbo].[Users] OFF
 GO
@@ -318,18 +317,23 @@ COMMIT
 GO
 
 -- ----------------------------
---  Procedure structure for sp_UpdateUserLevel
+--  Procedure structure for sp_UpdateUser
 -- ----------------------------
-IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_UpdateUserLevel]') AND type IN ('P', 'PC', 'RF', 'X'))
-	DROP PROCEDURE [dbo].[sp_UpdateUserLevel]
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_UpdateUser]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_UpdateUser]
 GO
-CREATE PROCEDURE [dbo].[sp_UpdateUserLevel] 
-	@account nvarchar(15) , @newLevel nvarchar(15),
+CREATE PROCEDURE [dbo].[sp_UpdateUser] 
+	@userId INT , @newLevel nvarchar(15) = NULL , @newTel nvarchar(12) = NULL , @newPassword nvarchar(15) = NULL,
 	@message varchar(30) OUTPUT
 AS
-IF EXISTS(SELECT 1 FROM users WHERE userAccount = @account)
+IF EXISTS(SELECT 1 FROM users WHERE Id = @userId)
 BEGIN
-	UPDATE users SET userLevel = @newLevel WHERE userAccount = @account 
+	IF(@newLevel IS NOT NULL)
+		UPDATE users SET userLevel = @newLevel WHERE Id = @userId 
+	IF(@newTel IS NOT NULL)
+		UPDATE users SET userTel = @newLevel WHERE Id = @userId
+	IF(@newPassword IS NOT NULL)
+		UPDATE users SET userPassword = @newPassword WHERE Id = @userId
 	set @message = 'update successful'
 	return 200
 end
@@ -339,31 +343,7 @@ BEGIN
 	return 404
 END
 GO
-IF ((SELECT COUNT(*) FROM ::fn_listextendedproperty('MS_Description', 'schema', 'dbo', 'PROCEDURE', 'sp_UpdateUserLevel', NULL, NULL)) > 0) EXEC sp_updateextendedproperty 'MS_Description', N'修改用户等级', 'schema', 'dbo', 'PROCEDURE', 'sp_UpdateUserLevel' ELSE EXEC sp_addextendedproperty 'MS_Description', N'修改用户等级', 'schema', 'dbo', 'PROCEDURE', 'sp_UpdateUserLevel'
-GO
-
--- ----------------------------
---  Procedure structure for sp_UpdateUserTel
--- ----------------------------
-IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_UpdateUserTel]') AND type IN ('P', 'PC', 'RF', 'X'))
-	DROP PROCEDURE [dbo].[sp_UpdateUserTel]
-GO
-CREATE PROCEDURE [dbo].[sp_UpdateUserTel] 
-	@account nvarchar(15),
-	@newTel nvarchar(12),
-	@message varchar(30)
-AS
-IF EXISTS(SELECT 1 FROM users where useraccount = @account)
-begin
-	UPDATE users set userTel = @newTel WHERE userAccount = @account
-	set @message = 'update successful'
-	return 200
-end
-else
-BEGIN
-	set @message = 'the user is not exists'
-	return 404
-END
+IF ((SELECT COUNT(*) FROM ::fn_listextendedproperty('MS_Description', 'schema', 'dbo', 'PROCEDURE', 'sp_UpdateUser', NULL, NULL)) > 0) EXEC sp_updateextendedproperty 'MS_Description', N'修改用户等级', 'schema', 'dbo', 'PROCEDURE', 'sp_UpdateUser' ELSE EXEC sp_addextendedproperty 'MS_Description', N'修改用户等级', 'schema', 'dbo', 'PROCEDURE', 'sp_UpdateUser'
 GO
 
 -- ----------------------------
@@ -373,7 +353,7 @@ IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_
 	DROP PROCEDURE [dbo].[sp_CreateTheater]
 GO
 CREATE PROCEDURE [dbo].[sp_CreateTheater] 
-	@name nvarchar(30), 
+	@theaterName nvarchar(30), 
 	@location nvarchar(30),
 	@mapSite nvarchar(30),
 	@adminId int,
@@ -383,7 +363,7 @@ CREATE PROCEDURE [dbo].[sp_CreateTheater]
 AS
 IF EXISTS(SELECT 1 FROM dbo.Users WHERE Id = @adminId)
 BEGIN
-	IF NOT EXISTS(SELECT 1 FROM dbo.Theaters WHERE Theaters.theaterName = @name)
+	IF NOT EXISTS(SELECT 1 FROM dbo.Theaters WHERE Theaters.theaterName = @theaterName)
 	BEGIN
 		INSERT INTO dbo.Theaters (
 			Theaters.theaterName , 
@@ -394,9 +374,9 @@ BEGIN
 			Theaters.seatColCount
 			)
 		VALUES (
-			@name , @location , @mapSite , @adminId , @seatRowsCount , @seatColsCount
+			@theaterName , @location , @mapSite , @adminId , @seatRowsCount , @seatColsCount
 		)
-		SET @message = 'created successful'
+		SET @message = 'successful'
 		RETURN 200
 	END
 	ELSE
@@ -416,22 +396,22 @@ IF ((SELECT COUNT(*) FROM ::fn_listextendedproperty('MS_Description', 'schema', 
 GO
 
 -- ----------------------------
---  Procedure structure for sp_UpdateTheaterAdminId
+--  Procedure structure for sp_UpdateTheater
 -- ----------------------------
-IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_UpdateTheaterAdminId]') AND type IN ('P', 'PC', 'RF', 'X'))
-	DROP PROCEDURE [dbo].[sp_UpdateTheaterAdminId]
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_UpdateTheater]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_UpdateTheater]
 GO
-CREATE PROCEDURE [dbo].[sp_UpdateTheaterAdminId] 
-	@name nvarchar(30), 
-	@adminId int,
+CREATE PROCEDURE [dbo].[sp_UpdateTheater] 
+	@theaterId INT , 
+	@newAdminId int,
 	@message varchar(30) OUTPUT
 AS
-IF EXISTS(SELECT 1 FROM dbo.Users WHERE Id = @adminId)
+IF EXISTS(SELECT 1 FROM dbo.Users WHERE Id = @newAdminId)
 BEGIN
-	IF EXISTS(SELECT 1 FROM dbo.Theaters WHERE Theaters.theaterName = @name)
+	IF EXISTS(SELECT 1 FROM dbo.Theaters WHERE Theaters.Id = @theaterId)
 	BEGIN
-		UPDATE Theaters SET theaterAdminID = @adminId WHERE theaterName = @name
-		SET @message = 'update successful'
+		UPDATE Theaters SET theaterAdminID = @newAdminId WHERE Theaters.Id = @theaterId
+		SET @message = 'successful'
 		RETURN 200
 	END
 	ELSE
@@ -442,11 +422,11 @@ BEGIN
 END
 ELSE
 BEGIN
-	SET @message = 'the user  is not exists'
+	SET @message = 'the user is not exists'
 	RETURN 404
 END
 GO
-IF ((SELECT COUNT(*) FROM ::fn_listextendedproperty('MS_Description', 'schema', 'dbo', 'PROCEDURE', 'sp_UpdateTheaterAdminId', NULL, NULL)) > 0) EXEC sp_updateextendedproperty 'MS_Description', N'修改影厅管理者', 'schema', 'dbo', 'PROCEDURE', 'sp_UpdateTheaterAdminId' ELSE EXEC sp_addextendedproperty 'MS_Description', N'修改影厅管理者', 'schema', 'dbo', 'PROCEDURE', 'sp_UpdateTheaterAdminId'
+IF ((SELECT COUNT(*) FROM ::fn_listextendedproperty('MS_Description', 'schema', 'dbo', 'PROCEDURE', 'sp_UpdateTheater', NULL, NULL)) > 0) EXEC sp_updateextendedproperty 'MS_Description', N'修改影厅管理者', 'schema', 'dbo', 'PROCEDURE', 'sp_UpdateTheater' ELSE EXEC sp_addextendedproperty 'MS_Description', N'修改影厅管理者', 'schema', 'dbo', 'PROCEDURE', 'sp_UpdateTheater'
 GO
 
 -- ----------------------------
@@ -456,14 +436,14 @@ IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_
 	DROP PROCEDURE [dbo].[sp_DeleteUser]
 GO
 CREATE PROCEDURE [dbo].[sp_DeleteUser]   
-@account nvarchar(15),
+@userId INT,
 @message varchar(30) OUTPUT
 as
-if exists(select 1 from Users where userAccount = @account)
+if exists(select 1 from Users where Id = @userId)
 begin
 	begin try
-		DELETE Users WHERE userAccount = @account
-		set @message = 'delete successful'
+		DELETE Users WHERE Id = @userId
+		set @message = 'successful'
 		return 204
 	end try
 	begin catch
@@ -496,7 +476,7 @@ begin
 	if(@password = @userPassword)
 	begin
 		update Users set lastSigninTime	= getdate() where userAccount = @account
-		set @message = 'login successful' 
+		set @message = 'successful' 
 		return	200
 	end
 	else
@@ -510,49 +490,37 @@ else
 GO
 
 -- ----------------------------
---  Procedure structure for sp_GetUser
+--  Procedure structure for sp_QueryUser
 -- ----------------------------
-IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_GetUser]') AND type IN ('P', 'PC', 'RF', 'X'))
-	DROP PROCEDURE [dbo].[sp_GetUser]
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_QueryUser]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_QueryUser]
 GO
-CREATE PROCEDURE [dbo].[sp_GetUser]   
-@account nvarchar(15),
+CREATE PROCEDURE [dbo].[sp_QueryUser]   
+@account nvarchar(15) = NULL,
+@userId INT = NULL ,
 @message varchar(30) OUTPUT
 as
-IF EXISTS(SELECT 1 FROM users WHERE userAccount = @account)
+IF EXISTS(SELECT 1 FROM users 
+	WHERE(@account IS NULL OR userAccount = @account)
+	AND (@userId IS NULL OR Id = @userId))
 BEGIN
-	select userName , userAccount , userPassword , signUpTime , lastSigninTime , userLevel , userSex , userAvatar , userTel
-	from Users where userAccount = @account
-	SET @message = 'query successful'
-	RETURN 200
+	BEGIN TRY
+		SELECT *
+		from Users 
+		where (@account IS NULL OR userAccount = @account)
+			AND (@userId IS NULL OR Id = @userId)
+		SET @message = 'successful'
+		RETURN 200
+	END TRY
+	BEGIN CATCH
+		SET @message = ERROR_MESSAGE()
+		RETURN ERROR_NUMBER()
+	END CATCH
 END
 ELSE
 BEGIN
 	SET @message = 'the user is not exists'
 	RETURN 404
-END
-GO
-
--- ----------------------------
---  Procedure structure for sp_UpdateUserPassword
--- ----------------------------
-IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_UpdateUserPassword]') AND type IN ('P', 'PC', 'RF', 'X'))
-	DROP PROCEDURE [dbo].[sp_UpdateUserPassword]
-GO
-CREATE PROCEDURE [dbo].[sp_UpdateUserPassword]  
-@account nvarchar(18) , @newPassword nvarchar(18),
-@message varchar(30) OUTPUT
-AS
-if EXISTS(select 1 from users where userAccount = @account)
-begin
-	update users set userPassword = @newPassword where userAccount = @account
-	set @message = 'update successful'
-	return 200
-end
-else
-BEGIN
-	set @message = 'the user is not exists'
-	return 404
 END
 GO
 
@@ -573,7 +541,7 @@ begin
 	begin try
 		insert into Users values
 		(@name , @account , @password , getdate() , getdate() , @level , @sex , null , @tel);
-		set @message = 'create successful'
+		set @message = 'successful'
 		return 200
 	end try
 	begin catch
@@ -605,7 +573,7 @@ BEGIN
 			(repName , duration , tags , profile)
 			VALUES
 			(@repName , @duration , @tags , @profile)
-		SET @message = 'created successful'
+		SET @message = 'successful'
 		RETURN 200
 	END TRY
 	BEGIN CATCH
@@ -649,7 +617,7 @@ BEGIN
 					(theaterID , rowNumber , colNumber , status)
 					VALUES 
 					(@theaterID , @rowNumber , @colNumber , 1)
-				SET @message = 'created successful'
+				SET @message = 'successful'
 				RETURN 201 --创建成功
 			END TRY
 			BEGIN CATCH
@@ -687,7 +655,7 @@ IF EXISTS(SELECT 1 FROM Seats WHERE Id = @seatID)
 BEGIN
 	BEGIN TRY
 		UPDATE Seats SET status = @status WHERE Id = @seatID
-		SET @message = 'update successful'
+		SET @message = 'successful'
 		RETURN 200
 	END TRY
 	BEGIN CATCH
@@ -727,7 +695,7 @@ BEGIN
 				INSERT INTO Goods (proId , theaterId , performance , playDate , price)
 				VALUES
 				(@proId , @theaterId , @performance , @playDate , @price)
-				SET @message = 'created successful'
+				SET @message = 'successful'
 				RETURN 200
 			END TRY
 			BEGIN CATCH
@@ -749,6 +717,162 @@ BEGIN
 END
 GO
 IF ((SELECT COUNT(*) FROM ::fn_listextendedproperty('MS_Description', 'schema', 'dbo', 'PROCEDURE', 'sp_CreateGood', NULL, NULL)) > 0) EXEC sp_updateextendedproperty 'MS_Description', N'上架节目', 'schema', 'dbo', 'PROCEDURE', 'sp_CreateGood' ELSE EXEC sp_addextendedproperty 'MS_Description', N'上架节目', 'schema', 'dbo', 'PROCEDURE', 'sp_CreateGood'
+GO
+
+-- ----------------------------
+--  Procedure structure for sp_GetAllUser
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_GetAllUser]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_GetAllUser]
+GO
+CREATE PROCEDURE [dbo].[sp_GetAllUser] 	
+@message varchar(30) OUTPUT
+as
+BEGIN TRY
+	SELECT *
+	from Users
+	SET @message = 'successful'
+	RETURN 200
+END TRY
+BEGIN CATCH
+	SET @message = ERROR_MESSAGE()
+	RETURN ERROR_NUMBER()
+END CATCH
+GO
+
+-- ----------------------------
+--  Procedure structure for sp_GetAllTheater
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_GetAllTheater]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_GetAllTheater]
+GO
+CREATE PROCEDURE [dbo].[sp_GetAllTheater] 
+@message varchar(30) OUTPUT
+as
+BEGIN TRY
+	select *
+	from Theaters
+	SET @message = 'successful'
+	RETURN 200
+END TRY
+BEGIN CATCH
+	SET @message = ERROR_MESSAGE()
+	RETURN ERROR_NUMBER()
+END CATCH
+GO
+
+-- ----------------------------
+--  Procedure structure for sp_QueryTheater
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_QueryTheater]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_QueryTheater]
+GO
+CREATE PROCEDURE [dbo].[sp_QueryTheater] 
+@theaterName nvarchar(30) = NULL,
+@theaterId INT = NULL ,
+@message varchar(30) OUTPUT
+as
+IF EXISTS(SELECT 1 FROM Theaters 
+	WHERE (@theaterName IS NULL OR theaterName = @theaterName)
+	AND (@theaterId = NULL OR Id = @theaterId))
+BEGIN
+	BEGIN TRY
+		select *
+		from Theaters 
+		WHERE (@theaterName IS NULL OR theaterName = @theaterName)
+			AND (@theaterId = NULL OR Id = @theaterId)
+		SET @message = 'successful'
+		RETURN 200
+	END TRY
+	BEGIN CATCH
+		SET @message = ERROR_MESSAGE()
+		RETURN ERROR_NUMBER()
+	END CATCH
+END
+ELSE
+BEGIN
+	SET @message = 'the theater is not exists'
+	RETURN 404
+END
+
+GO
+
+-- ----------------------------
+--  Procedure structure for sp_DeleteTheater
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_DeleteTheater]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_DeleteTheater]
+GO
+CREATE PROCEDURE [dbo].[sp_DeleteTheater] 
+	@theaterId INT , 
+	@message varchar(30) OUTPUT
+AS
+if exists(select 1 from Theaters where Id = @theaterId)
+begin
+	begin try
+		DELETE Theaters where Id = @theaterId
+		set @message = 'successful'
+		return 204
+	end try
+	begin catch
+		set @message = ERROR_MESSAGE()
+		return ERROR_NUMBER()
+	end catch
+end
+else
+begin
+	set @message = 'the theater is not exists'
+	return 404
+end
+
+GO
+
+-- ----------------------------
+--  Procedure structure for sp_GetAllSeat
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_GetAllSeat]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_GetAllSeat]
+GO
+CREATE PROCEDURE [dbo].[sp_GetAllSeat] 
+	@message varchar(30) OUTPUT
+AS
+BEGIN TRY
+	select *
+	from Seats
+	SET @message = 'successful'
+	RETURN 200
+END TRY
+BEGIN CATCH
+	SET @message = ERROR_MESSAGE()
+	RETURN ERROR_NUMBER()
+END CATCH
+
+GO
+
+-- ----------------------------
+--  Procedure structure for sp_QuerySeat
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_QuerySeat]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_QuerySeat]
+GO
+CREATE PROCEDURE [dbo].[sp_QuerySeat] 
+	@theaterId INT = NULL, @rowNumber INT = NULL , @colNumber INT = NULL,
+	@seatId INT = NULL ,
+	@message varchar(30) OUTPUT
+AS
+BEGIN TRY
+	select *
+	from Seats 
+	WHERE (@theaterId IS NULL OR (theaterID = @theaterID AND rowNumber = @rowNumber AND colNumber = @colNumber)) 
+		AND(@seatId IS NULL OR @SeatId = Id)		
+	SET @message = 'successful'
+	RETURN 200
+END TRY
+BEGIN CATCH
+	SET @message = ERROR_MESSAGE()
+	RETURN ERROR_NUMBER()
+END CATCH
+
 GO
 
 
@@ -1046,7 +1170,7 @@ GO
 -- ----------------------------
 ALTER TABLE [dbo].[Theaters] SET (LOCK_ESCALATION = TABLE)
 GO
-DBCC CHECKIDENT ('[dbo].[Theaters]', RESEED, 1)
+DBCC CHECKIDENT ('[dbo].[Theaters]', RESEED, 3)
 GO
 
 -- ----------------------------
