@@ -12,7 +12,7 @@
  Target Server Version : 13004001
  File Encoding         : utf-8
 
- Date: 05/20/2017 01:19:15 AM
+ Date: 05/20/2017 23:55:30 PM
 */
 
 -- ----------------------------
@@ -76,12 +76,12 @@ EXEC sp_addextendedproperty 'MS_Description', N'完成此订单的放映厅ID', 
 GO
 
 -- ----------------------------
---  Table structure for Programme
+--  Table structure for Programmes
 -- ----------------------------
-IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[Programme]') AND type IN ('U'))
-	DROP TABLE [dbo].[Programme]
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[Programmes]') AND type IN ('U'))
+	DROP TABLE [dbo].[Programmes]
 GO
-CREATE TABLE [dbo].[Programme] (
+CREATE TABLE [dbo].[Programmes] (
 	[Id] int IDENTITY(1,1) NOT NULL,
 	[proName] nvarchar(50) COLLATE Chinese_PRC_CI_AS NOT NULL,
 	[duration] int NOT NULL,
@@ -89,29 +89,29 @@ CREATE TABLE [dbo].[Programme] (
 	[profile] text COLLATE Chinese_PRC_CI_AS NULL DEFAULT (N'无简介')
 )
 GO
-EXEC sp_addextendedproperty 'MS_Description', N'剧目表', 'SCHEMA', 'dbo', 'TABLE', 'Programme'
+EXEC sp_addextendedproperty 'MS_Description', N'剧目表', 'SCHEMA', 'dbo', 'TABLE', 'Programmes'
 GO
-EXEC sp_addextendedproperty 'MS_Description', N'剧目ID', 'SCHEMA', 'dbo', 'TABLE', 'Programme', 'COLUMN', 'Id'
+EXEC sp_addextendedproperty 'MS_Description', N'剧目ID', 'SCHEMA', 'dbo', 'TABLE', 'Programmes', 'COLUMN', 'Id'
 GO
-EXEC sp_addextendedproperty 'MS_Description', N'剧目名称', 'SCHEMA', 'dbo', 'TABLE', 'Programme', 'COLUMN', 'proName'
+EXEC sp_addextendedproperty 'MS_Description', N'剧目名称', 'SCHEMA', 'dbo', 'TABLE', 'Programmes', 'COLUMN', 'proName'
 GO
-EXEC sp_addextendedproperty 'MS_Description', N'剧目时长(分钟)', 'SCHEMA', 'dbo', 'TABLE', 'Programme', 'COLUMN', 'duration'
+EXEC sp_addextendedproperty 'MS_Description', N'剧目时长(分钟)', 'SCHEMA', 'dbo', 'TABLE', 'Programmes', 'COLUMN', 'duration'
 GO
-EXEC sp_addextendedproperty 'MS_Description', N'剧目标签', 'SCHEMA', 'dbo', 'TABLE', 'Programme', 'COLUMN', 'tags'
+EXEC sp_addextendedproperty 'MS_Description', N'剧目标签', 'SCHEMA', 'dbo', 'TABLE', 'Programmes', 'COLUMN', 'tags'
 GO
-EXEC sp_addextendedproperty 'MS_Description', N'剧目简介', 'SCHEMA', 'dbo', 'TABLE', 'Programme', 'COLUMN', 'profile'
+EXEC sp_addextendedproperty 'MS_Description', N'剧目简介', 'SCHEMA', 'dbo', 'TABLE', 'Programmes', 'COLUMN', 'profile'
 GO
 
 -- ----------------------------
---  Records of Programme
+--  Records of Programmes
 -- ----------------------------
 BEGIN TRANSACTION
 GO
-SET IDENTITY_INSERT [dbo].[Programme] ON
+SET IDENTITY_INSERT [dbo].[Programmes] ON
 GO
-INSERT INTO [dbo].[Programme] ([Id], [proName], [duration], [tags], [profile]) VALUES ('7', N'一只狗的使命', '120', N'宠物', N'一只狗的使命');
+INSERT INTO [dbo].[Programmes] ([Id], [proName], [duration], [tags], [profile]) VALUES ('8', N'长江10号', '120', N'喜剧', N'哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈');
 GO
-SET IDENTITY_INSERT [dbo].[Programme] OFF
+SET IDENTITY_INSERT [dbo].[Programmes] OFF
 GO
 COMMIT
 GO
@@ -450,15 +450,15 @@ GO
 BEGIN TRANSACTION
 GO
 INSERT INTO [dbo].[UserIPs] VALUES ('0.0.0.1', '-1');
-INSERT INTO [dbo].[UserIPs] VALUES ('111.20.21.63', '496');
-INSERT INTO [dbo].[UserIPs] VALUES ('111.20.21.85', '-1');
-INSERT INTO [dbo].[UserIPs] VALUES ('115.239.212.132', '-1');
-INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.111', '-1');
-INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.116', '-1');
-INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.25', '498');
-INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.41', '-1');
-INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.63', '-1');
-INSERT INTO [dbo].[UserIPs] VALUES ('221.11.61.134', '499');
+INSERT INTO [dbo].[UserIPs] VALUES ('111.20.21.63', '500');
+INSERT INTO [dbo].[UserIPs] VALUES ('111.20.21.85', '500');
+INSERT INTO [dbo].[UserIPs] VALUES ('115.239.212.132', '500');
+INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.111', '500');
+INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.116', '500');
+INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.25', '500');
+INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.41', '500');
+INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.63', '500');
+INSERT INTO [dbo].[UserIPs] VALUES ('221.11.61.134', '500');
 GO
 COMMIT
 GO
@@ -517,6 +517,141 @@ GO
 SET IDENTITY_INSERT [dbo].[Users] OFF
 GO
 COMMIT
+GO
+
+-- ----------------------------
+--  Procedure structure for sp_CreateProgramme
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_CreateProgramme]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_CreateProgramme]
+GO
+CREATE PROCEDURE [dbo].[sp_CreateProgramme] 
+@proName nvarchar(50) , @duration INT , @tags nvarchar(20) , @profile TEXT ,
+@message nvarchar(30) OUTPUT
+AS
+IF NOT EXISTS(SELECT 1 FROM dbo.Programmes WHERE proName = @proName)
+BEGIN
+	BEGIN TRY
+		INSERT INTO Programmes
+			(proName , duration , tags , profile)
+			VALUES
+			(@proName , @duration , @tags , @profile)
+		SET @message = 'successful'
+		RETURN 200
+	END TRY
+	BEGIN CATCH
+		SELECT ERROR_MESSAGE()
+		RETURN ERROR_NUMBER() --其他错误
+	END CATCH
+END
+ELSE
+BEGIN 
+	SET @message = 'the programme is exists'
+	RETURN 400 --名称已存在
+END
+GO
+
+-- ----------------------------
+--  Procedure structure for sp_DeleteProgramme
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_DeleteProgramme]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_DeleteProgramme]
+GO
+CREATE PROCEDURE [dbo].[sp_DeleteProgramme] 
+	@programmeId INT , 
+	@message VARCHAR(30) OUTPUT
+AS
+IF EXISTS(SELECT 1 FROM Programmes WHERE Id = @ProgrammeId)
+BEGIN
+	BEGIN TRY
+		DELETE Programmes WHERE Id = @ProgrammeId
+		SET @message = 'successful'
+		RETURN 204
+	END TRY
+	BEGIN CATCH
+		SET @message = ERROR_MESSAGE()
+		RETURN ERROR_NUMBER()
+	END CATCH
+END
+ELSE
+BEGIN
+	SET @message = 'the programme is not exists'
+	RETURN 404
+END
+
+GO
+
+-- ----------------------------
+--  Procedure structure for sp_GetAllProgramme
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_GetAllProgramme]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_GetAllProgramme]
+GO
+CREATE PROCEDURE [dbo].[sp_GetAllProgramme] 
+	@message VARCHAR(30) OUTPUT
+AS
+BEGIN TRY
+	SELECT * 
+	FROM Programmes
+	SET @message = 'successful'
+	RETURN 200
+END TRY
+BEGIN CATCH
+	SET @message = ERROR_MESSAGE()
+	RETURN ERROR_NUMBER()
+END CATCH
+
+GO
+
+-- ----------------------------
+--  Procedure structure for sp_QueryProgramme
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_QueryProgramme]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_QueryProgramme]
+GO
+CREATE PROCEDURE [dbo].[sp_QueryProgramme] 
+	@programmeName NVARCHAR(50) = NULL , 
+	@programmeId INT = NULL , 
+	@message VARCHAR(30) OUTPUT
+AS
+BEGIN TRY
+	SELECT *
+	FROM Programmes 
+	WHERE (@programmeName IS NULL OR @programmeName = proName) 
+		AND(@programmeId IS NULL OR @programmeId = Id)		
+	SET @message = 'successful'
+	RETURN 200
+END TRY
+BEGIN CATCH
+	SET @message = ERROR_MESSAGE()
+	RETURN ERROR_NUMBER()
+END CATCH
+
+GO
+
+-- ----------------------------
+--  Procedure structure for sp_SelectProgramme
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_SelectProgramme]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_SelectProgramme]
+GO
+CREATE PROCEDURE [dbo].[sp_SelectProgramme] 
+	@tags NVARCHAR(20) ,
+	@message VARCHAR(30) OUTPUT
+AS
+BEGIN TRY
+	SELECT *
+	FROM Programmes 
+	WHERE tags = @tags		
+	SET @message = 'successful'
+	RETURN 200
+END TRY
+BEGIN CATCH
+	SET @message = ERROR_MESSAGE()
+	RETURN ERROR_NUMBER()
+END CATCH
+
+
 GO
 
 -- ----------------------------
@@ -703,28 +838,19 @@ CREATE PROCEDURE [dbo].[sp_QueryUser]
 @userId INT = NULL ,
 @message varchar(30) OUTPUT
 as
-IF EXISTS(SELECT 1 FROM users 
-	WHERE(@account IS NULL OR userAccount = @account)
-	AND (@userId IS NULL OR Id = @userId))
-BEGIN
-	BEGIN TRY
-		SELECT *
-		from Users 
-		where (@account IS NULL OR userAccount = @account)
-			AND (@userId IS NULL OR Id = @userId)
-		SET @message = 'successful'
-		RETURN 200
-	END TRY
-	BEGIN CATCH
-		SET @message = ERROR_MESSAGE()
-		RETURN ERROR_NUMBER()
-	END CATCH
-END
-ELSE
-BEGIN
-	SET @message = 'the user is not exists'
-	RETURN 404
-END
+BEGIN TRY
+	SELECT *
+	from Users 
+	where (@account IS NULL OR userAccount = @account)
+		AND (@userId IS NULL OR Id = @userId)
+	SET @message = 'successful'
+	RETURN 200
+END TRY
+BEGIN CATCH
+	SET @message = ERROR_MESSAGE()
+	RETURN ERROR_NUMBER()
+END CATCH
+
 GO
 
 -- ----------------------------
@@ -757,40 +883,6 @@ begin
 	set @message = 'the user is exists'
 	return 400
 end
-GO
-
--- ----------------------------
---  Procedure structure for sp_CreatePerformance
--- ----------------------------
-IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_CreatePerformance]') AND type IN ('P', 'PC', 'RF', 'X'))
-	DROP PROCEDURE [dbo].[sp_CreatePerformance]
-GO
-CREATE PROCEDURE [dbo].[sp_CreatePerformance] 
-@repName nvarchar(50) , @duration INT , @tags nvarchar(20) , @profile TEXT ,
-@message nvarchar(30) OUTPUT
-AS
-IF NOT EXISTS(SELECT 1 FROM dbo.Repertoires WHERE repName = @repName)
-BEGIN
-	BEGIN TRY
-		INSERT INTO Repertoires 
-			(repName , duration , tags , profile)
-			VALUES
-			(@repName , @duration , @tags , @profile)
-		SET @message = 'successful'
-		RETURN 200
-	END TRY
-	BEGIN CATCH
-		SELECT ERROR_MESSAGE()
-		RETURN ERROR_NUMBER() --其他错误
-	END CATCH
-END
-ELSE
-BEGIN 
-	SET @message = 'the repertoires is exists'
-	RETURN 400 --名称已存在
-END
-GO
-IF ((SELECT COUNT(*) FROM ::fn_listextendedproperty('MS_Description', 'schema', 'dbo', 'PROCEDURE', 'sp_CreatePerformance', NULL, NULL)) > 0) EXEC sp_updateextendedproperty 'MS_Description', N'增加一个新的剧目', 'schema', 'dbo', 'PROCEDURE', 'sp_CreatePerformance' ELSE EXEC sp_addextendedproperty 'MS_Description', N'增加一个新的剧目', 'schema', 'dbo', 'PROCEDURE', 'sp_CreatePerformance'
 GO
 
 -- ----------------------------
@@ -1154,9 +1246,9 @@ EXEC sp_addextendedproperty 'MS_Description', N'订单索引', 'SCHEMA', 'dbo', 
 GO
 
 -- ----------------------------
---  Primary key structure for table Programme
+--  Primary key structure for table Programmes
 -- ----------------------------
-ALTER TABLE [dbo].[Programme] ADD
+ALTER TABLE [dbo].[Programmes] ADD
 	CONSTRAINT [PK__Repertoi__3214EC07BD0E06D7] PRIMARY KEY CLUSTERED ([Id]) 
 	WITH (PAD_INDEX = OFF,
 		IGNORE_DUP_KEY = OFF,
@@ -1331,7 +1423,7 @@ GO
 -- ----------------------------
 ALTER TABLE [dbo].[Goods] ADD
 	CONSTRAINT [goods_theaterId] FOREIGN KEY ([theaterID]) REFERENCES [dbo].[Theaters] ([Id]) ON DELETE CASCADE ON UPDATE NO ACTION,
-	CONSTRAINT [goods_proId] FOREIGN KEY ([proID]) REFERENCES [dbo].[Programme] ([Id]) ON DELETE CASCADE ON UPDATE NO ACTION
+	CONSTRAINT [goods_proId] FOREIGN KEY ([proID]) REFERENCES [dbo].[Programmes] ([Id]) ON DELETE CASCADE ON UPDATE NO ACTION
 GO
 EXEC sp_addextendedproperty 'MS_Description', N'剧院外键', 'SCHEMA', 'dbo', 'TABLE', 'Goods', 'CONSTRAINT', 'goods_theaterId'
 GO
@@ -1395,11 +1487,11 @@ DBCC CHECKIDENT ('[dbo].[Orders]', RESEED, 1)
 GO
 
 -- ----------------------------
---  Options for table Programme
+--  Options for table Programmes
 -- ----------------------------
-ALTER TABLE [dbo].[Programme] SET (LOCK_ESCALATION = TABLE)
+ALTER TABLE [dbo].[Programmes] SET (LOCK_ESCALATION = TABLE)
 GO
-DBCC CHECKIDENT ('[dbo].[Programme]', RESEED, 7)
+DBCC CHECKIDENT ('[dbo].[Programmes]', RESEED, 8)
 GO
 
 -- ----------------------------
