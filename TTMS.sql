@@ -1,4 +1,110 @@
-create table TTMS.dbo.Users
+CREATE TABLE Goods
+(
+    Id INT PRIMARY KEY NOT NULL IDENTITY,
+    proID INT NOT NULL,
+    theaterID INT NOT NULL,
+    performance NVARCHAR(10) DEFAULT N'早一' NOT NULL,
+    playdate DATE DEFAULT '1-1-2017' NOT NULL,
+    price MONEY DEFAULT '0' NOT NULL,
+    CONSTRAINT goods_proId FOREIGN KEY (proID) REFERENCES Programmes (Id),
+    CONSTRAINT goods_theaterId FOREIGN KEY (theaterID) REFERENCES Theaters (Id)
+);
+CREATE TABLE Orders
+(
+    Id INT PRIMARY KEY NOT NULL IDENTITY,
+    ticketID INT NOT NULL,
+    userID INT NOT NULL,
+    type INT DEFAULT 1 NOT NULL,
+    time DATETIME DEFAULT getdate() NOT NULL,
+    theaterID INT NOT NULL,
+    CONSTRAINT order_ticketID FOREIGN KEY (ticketID) REFERENCES Tickets (Id),
+    CONSTRAINT order_userID FOREIGN KEY (userID) REFERENCES Users (Id)
+);
+CREATE INDEX index_order ON Orders (userID, theaterID);
+CREATE TABLE Programmes
+(
+    Id INT PRIMARY KEY NOT NULL IDENTITY,
+    proName NVARCHAR(50) NOT NULL,
+    duration INT NOT NULL,
+    tags NVARCHAR(20),
+    profile TEXT DEFAULT N'无简介'
+);
+CREATE TABLE Seats
+(
+    Id INT PRIMARY KEY NOT NULL IDENTITY,
+    theaterID INT NOT NULL,
+    status BIT DEFAULT 1 NOT NULL,
+    rowNumber INT DEFAULT 1 NOT NULL,
+    colNumber INT DEFAULT 1 NOT NULL,
+    CONSTRAINT theaterID FOREIGN KEY (theaterID) REFERENCES Theaters (Id)
+);
+CREATE TABLE Theaters
+(
+    Id INT PRIMARY KEY NOT NULL IDENTITY,
+    theaterName NVARCHAR(30) DEFAULT N'影厅' NOT NULL,
+    theaterLocation NVARCHAR(30) DEFAULT N'中国' NOT NULL,
+    theaterMapSite NVARCHAR(30) DEFAULT 'https://gaode.com',
+    theaterAdminID INT,
+    seatRowCount INT DEFAULT 0 NOT NULL,
+    seatColCount INT DEFAULT 0 NOT NULL,
+    CONSTRAINT theaterAdminID FOREIGN KEY (theaterAdminID) REFERENCES Users (Id)
+);
+CREATE UNIQUE INDEX un_theaterName ON Theaters (theaterName);
+CREATE TABLE Tickets
+(
+    Id INT PRIMARY KEY NOT NULL IDENTITY,
+    status INT DEFAULT 0 NOT NULL,
+    seatID INT NOT NULL,
+    goodID INT NOT NULL,
+    CONSTRAINT tic_seatId FOREIGN KEY (seatID) REFERENCES Seats (Id),
+    CONSTRAINT tic_goodId FOREIGN KEY (goodID) REFERENCES Goods (Id)
+);
+CREATE INDEX index_goodId ON Tickets (goodID);
+CREATE TABLE UserIPs
+(
+    ip VARCHAR(20) PRIMARY KEY NOT NULL,
+    limitTimes INT DEFAULT 500 NOT NULL
+);
+CREATE TABLE Users
+(
+    Id INT PRIMARY KEY NOT NULL IDENTITY,
+    userName NVARCHAR(30) NOT NULL,
+    userAccount NVARCHAR(15) NOT NULL,
+    userPassword NVARCHAR(15) NOT NULL,
+    signUpTime DATETIME NOT NULL,
+    lastSigninTime DATETIME NOT NULL,
+    userLevel NVARCHAR(15) NOT NULL,
+    userSex NVARCHAR(10),
+    userAvatar VARBINARY(4096),
+    userTel NVARCHAR(12)
+);
+CREATE PROCEDURE sp_CreateGood(@programmeId INT, @theaterId INT, @performance SYSNAME, @playDate DATE, @price MONEY, @message VARCHAR);
+CREATE PROCEDURE sp_CreateProgramme(@proName SYSNAME, @duration INT, @tags SYSNAME, @profile TEXT, @message SYSNAME);
+CREATE PROCEDURE sp_CreateSeat(@theaterID INT, @rowNumber INT, @colNumber INT, @message VARCHAR);
+CREATE PROCEDURE sp_CreateTheater(@theaterName SYSNAME, @location SYSNAME, @mapSite SYSNAME, @adminId INT, @seatRowsCount INT, @seatColsCount INT, @message VARCHAR);
+CREATE PROCEDURE sp_CreateUser(@name SYSNAME, @account SYSNAME, @password SYSNAME, @level SYSNAME, @sex SYSNAME, @tel SYSNAME, @message VARCHAR);
+CREATE PROCEDURE sp_DeleteGood(@goodId INT, @message VARCHAR);
+CREATE PROCEDURE sp_DeleteProgramme(@programmeId INT, @message VARCHAR);
+CREATE PROCEDURE sp_DeleteSeat(@seatId INT, @message VARCHAR);
+CREATE PROCEDURE sp_DeleteTheater(@theaterId INT, @message VARCHAR);
+CREATE PROCEDURE sp_DeleteUser(@userId INT, @message VARCHAR);
+CREATE PROCEDURE sp_GetAllGood(@message VARCHAR);
+CREATE PROCEDURE sp_GetAllProgramme(@message VARCHAR);
+CREATE PROCEDURE sp_GetAllSeat(@message VARCHAR);
+CREATE PROCEDURE sp_GetAllTheater(@message VARCHAR);
+CREATE PROCEDURE sp_GetAllUser(@message VARCHAR);
+CREATE PROCEDURE sp_GetTickets(@theaterId INT, @playDate DATE, @performance SYSNAME, @message VARCHAR);
+CREATE PROCEDURE sp_Login(@account SYSNAME, @password SYSNAME, @message VARCHAR);
+CREATE PROCEDURE sp_QueryGood(@goodId INT, @message VARCHAR);
+CREATE PROCEDURE sp_QueryProgramme(@programmeName SYSNAME, @programmeId INT, @message VARCHAR);
+CREATE PROCEDURE sp_QuerySeat(@theaterId INT, @rowNumber INT, @colNumber INT, @seatId INT, @message VARCHAR);
+CREATE PROCEDURE sp_QueryTheater(@theaterName SYSNAME, @theaterId INT, @message VARCHAR);
+CREATE PROCEDURE sp_QueryUser(@account SYSNAME, @userId INT, @message VARCHAR);
+CREATE PROCEDURE sp_SelectGood(@theaterId INT, @programmeId INT, @playDate DATE, @performance SYSNAME, @message VARCHAR);
+CREATE PROCEDURE sp_SelectProgramme(@tags SYSNAME, @message VARCHAR);
+CREATE PROCEDURE sp_UpdateSeatStatus(@seatID INT, @status BIT, @message VARCHAR);
+CREATE PROCEDURE sp_UpdateTheater(@theaterId INT, @newAdminId INT, @message VARCHAR);
+CREATE PROCEDURE sp_UpdateUser(@userId INT, @newLevel SYSNAME, @newTel SYSNAME, @newPassword SYSNAME, @message VARCHAR);reate table TTMS.dbo.Users
 (
 	Id int identity
 		primary key,
