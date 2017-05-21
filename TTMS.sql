@@ -12,7 +12,7 @@
  Target Server Version : 13004001
  File Encoding         : utf-8
 
- Date: 05/20/2017 23:55:30 PM
+ Date: 05/21/2017 13:04:26 PM
 */
 
 -- ----------------------------
@@ -43,6 +43,22 @@ GO
 EXEC sp_addextendedproperty 'MS_Description', N'播放日期', 'SCHEMA', 'dbo', 'TABLE', 'Goods', 'COLUMN', 'playdate'
 GO
 EXEC sp_addextendedproperty 'MS_Description', N'价格', 'SCHEMA', 'dbo', 'TABLE', 'Goods', 'COLUMN', 'price'
+GO
+
+-- ----------------------------
+--  Records of Goods
+-- ----------------------------
+BEGIN TRANSACTION
+GO
+SET IDENTITY_INSERT [dbo].[Goods] ON
+GO
+INSERT INTO [dbo].[Goods] ([Id], [proID], [theaterID], [performance], [playdate], [price]) VALUES ('1', '8', '8', N'早一', '2017-05-11', '53.00');
+INSERT INTO [dbo].[Goods] ([Id], [proID], [theaterID], [performance], [playdate], [price]) VALUES ('2', '8', '8', N'早二', '2017-05-11', '53.00');
+INSERT INTO [dbo].[Goods] ([Id], [proID], [theaterID], [performance], [playdate], [price]) VALUES ('3', '8', '8', N'早二', '2017-05-15', '53.00');
+GO
+SET IDENTITY_INSERT [dbo].[Goods] OFF
+GO
+COMMIT
 GO
 
 -- ----------------------------
@@ -110,6 +126,8 @@ GO
 SET IDENTITY_INSERT [dbo].[Programmes] ON
 GO
 INSERT INTO [dbo].[Programmes] ([Id], [proName], [duration], [tags], [profile]) VALUES ('8', N'长江10号', '120', N'喜剧', N'哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈');
+INSERT INTO [dbo].[Programmes] ([Id], [proName], [duration], [tags], [profile]) VALUES ('9', N'我不是潘金莲', '110', N'喜剧', N'我也不知道讲了什么');
+INSERT INTO [dbo].[Programmes] ([Id], [proName], [duration], [tags], [profile]) VALUES ('10', N'我不是潘金莲后传', '113', N'喜剧', N'我也不知道讲了什么');
 GO
 SET IDENTITY_INSERT [dbo].[Programmes] OFF
 GO
@@ -454,7 +472,8 @@ INSERT INTO [dbo].[UserIPs] VALUES ('111.20.21.63', '500');
 INSERT INTO [dbo].[UserIPs] VALUES ('111.20.21.85', '500');
 INSERT INTO [dbo].[UserIPs] VALUES ('115.239.212.132', '500');
 INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.111', '500');
-INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.116', '500');
+INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.116', '496');
+INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.117', '495');
 INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.25', '500');
 INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.41', '500');
 INSERT INTO [dbo].[UserIPs] VALUES ('117.32.216.63', '500');
@@ -651,6 +670,109 @@ BEGIN CATCH
 	RETURN ERROR_NUMBER()
 END CATCH
 
+
+GO
+
+-- ----------------------------
+--  Procedure structure for sp_GetAllGood
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_GetAllGood]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_GetAllGood]
+GO
+CREATE PROCEDURE [dbo].[sp_GetAllGood] 
+	@message varchar(30) OUTPUT
+AS
+BEGIN TRY
+	SELECT *
+	FROM Goods
+	SET @message = 'successful'
+	RETURN 200 --
+END TRY
+BEGIN CATCH
+	SET @message = ERROR_MESSAGE()
+	RETURN ERROR_NUMBER()
+END CATCH
+
+GO
+
+-- ----------------------------
+--  Procedure structure for sp_QueryGood
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_QueryGood]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_QueryGood]
+GO
+CREATE PROCEDURE [dbo].[sp_QueryGood] 
+	@goodId INT ,
+	@message VARCHAR(30) OUTPUT
+AS
+BEGIN TRY
+	SELECT * FROM Goods
+	WHERE Id = @goodId
+	SET @message = 'successful'
+	RETURN 200 --
+END TRY
+BEGIN CATCH
+	SET @message = ERROR_MESSAGE()
+	RETURN ERROR_NUMBER()
+END CATCH
+GO
+
+-- ----------------------------
+--  Procedure structure for sp_SelectGood
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_SelectGood]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_SelectGood]
+GO
+CREATE PROCEDURE [dbo].[sp_SelectGood] 
+	@theaterId INT = NULL , 
+	@programmeId INT = NULL , 
+	@playDate DATE = NULL , 
+	@performance NVARCHAR(10) = NULL ,
+	@message VARCHAR(30) OUTPUT
+AS
+BEGIN TRY
+	SELECT * FROM Goods
+	WHERE (@theaterId IS NULL OR theaterID = @theaterId)
+		AND (@programmeId IS NULL OR proID = @programmeId)
+		AND (@playDate IS NULL OR playDate = @playDate)
+		AND (@performance IS NULL OR performance = @performance)
+	SET @message = 'successful'
+	RETURN 200 --
+END TRY
+BEGIN CATCH
+	SET @message = ERROR_MESSAGE()
+	RETURN ERROR_NUMBER()
+END CATCH
+
+GO
+
+-- ----------------------------
+--  Procedure structure for sp_DeleteGood
+-- ----------------------------
+IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_DeleteGood]') AND type IN ('P', 'PC', 'RF', 'X'))
+	DROP PROCEDURE [dbo].[sp_DeleteGood]
+GO
+CREATE PROCEDURE [dbo].[sp_DeleteGood] 
+	@goodId INT , 
+	@message VARCHAR(30) OUTPUT
+AS
+IF EXISTS(SELECT 1 FROM Goods WHERE Id = @goodId)
+BEGIN
+	BEGIN TRY
+		DELETE Goods WHERE Id = @goodId
+		SET @message = 'successful'
+		RETURN 200
+	END TRY
+	BEGIN CATCH
+		SET @message = ERROR_MESSAGE()
+		RETURN ERROR_NUMBER()
+	END CATCH
+END
+ELSE
+BEGIN
+	SET @message = 'the good is not exists'
+	RETURN 404
+END
 
 GO
 
@@ -972,7 +1094,7 @@ IF EXISTS (SELECT * FROM sys.all_objects WHERE object_id = OBJECT_ID('[dbo].[sp_
 	DROP PROCEDURE [dbo].[sp_CreateGood]
 GO
 CREATE PROCEDURE [dbo].[sp_CreateGood] 
-	@proId INT , @theaterId INT , @performance nvarchar(10), @playDate DATE , @price MONEY ,
+	@programmeId INT , @theaterId INT , @performance nvarchar(10), @playDate DATE , @price MONEY ,
 	@message VARCHAR(30) OUTPUT
 AS
 IF(@performance NOT IN (N'早一',N'早二',N'午一',N'午二',N'晚一',N'晚二',N'午夜'))
@@ -984,19 +1106,27 @@ ELSE
 BEGIN
 	IF EXISTS(SELECT 1 FROM dbo.Theaters WHERE Theaters.Id = @theaterID)
 	BEGIN
-		IF EXISTS(SELECT 1 FROM dbo.Programme WHERE Programme.Id = @proID)
+		IF EXISTS(SELECT 1 FROM dbo.Programmes WHERE Programmes.Id = @programmeID)
 		BEGIN
-			BEGIN TRY
-				INSERT INTO Goods (proId , theaterId , performance , playDate , price)
-				VALUES
-				(@proId , @theaterId , @performance , @playDate , @price)
-				SET @message = 'successful'
-				RETURN 200
-			END TRY
-			BEGIN CATCH
-				SET @message = ERROR_MESSAGE()
-				RETURN ERROR_NUMBER()
-			END CATCH
+			IF NOT EXISTS(SELECT 1 FROM Goods WHERE @theaterId = theaterId AND @performance = performance AND @playDate = playDate)
+			BEGIN
+				BEGIN TRY
+					INSERT INTO Goods (proId , theaterId , performance , playDate , price)
+					VALUES
+					(@programmeId , @theaterId , @performance , @playDate , @price)
+					SET @message = 'successful'
+					RETURN 200
+				END TRY
+				BEGIN CATCH
+					SET @message = ERROR_MESSAGE()
+					RETURN ERROR_NUMBER()
+				END CATCH
+			END
+			ELSE
+			BEGIN
+				SET @message = 'the theater is busy'
+				RETURN 400
+			END
 		END
 		ELSE
 		BEGIN
@@ -1475,7 +1605,7 @@ GO
 -- ----------------------------
 ALTER TABLE [dbo].[Goods] SET (LOCK_ESCALATION = TABLE)
 GO
-DBCC CHECKIDENT ('[dbo].[Goods]', RESEED, 1)
+DBCC CHECKIDENT ('[dbo].[Goods]', RESEED, 5)
 GO
 
 -- ----------------------------
@@ -1491,7 +1621,7 @@ GO
 -- ----------------------------
 ALTER TABLE [dbo].[Programmes] SET (LOCK_ESCALATION = TABLE)
 GO
-DBCC CHECKIDENT ('[dbo].[Programmes]', RESEED, 8)
+DBCC CHECKIDENT ('[dbo].[Programmes]', RESEED, 10)
 GO
 
 -- ----------------------------
