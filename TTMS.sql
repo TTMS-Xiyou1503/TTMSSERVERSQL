@@ -1,222 +1,4 @@
-CREATE TABLE Goods
-(
-    Id INT PRIMARY KEY NOT NULL IDENTITY,
-    proID INT NOT NULL,
-    theaterID INT NOT NULL,
-    performance NVARCHAR(10) DEFAULT N'早一' NOT NULL,
-    playdate DATE DEFAULT '1-1-2017' NOT NULL,
-    price MONEY DEFAULT '0' NOT NULL,
-    CONSTRAINT goods_proId FOREIGN KEY (proID) REFERENCES Programmes (Id),
-    CONSTRAINT goods_theaterId FOREIGN KEY (theaterID) REFERENCES Theaters (Id)
-);
-CREATE TABLE Orders
-(
-    Id INT PRIMARY KEY NOT NULL IDENTITY,
-    ticketID INT NOT NULL,
-    userID INT NOT NULL,
-    type INT DEFAULT 1 NOT NULL,
-    time DATETIME DEFAULT getdate() NOT NULL,
-    theaterID INT NOT NULL,
-    CONSTRAINT order_ticketID FOREIGN KEY (ticketID) REFERENCES Tickets (Id),
-    CONSTRAINT order_userID FOREIGN KEY (userID) REFERENCES Users (Id)
-);
-CREATE INDEX index_order ON Orders (userID, theaterID);
-CREATE TABLE Programmes
-(
-    Id INT PRIMARY KEY NOT NULL IDENTITY,
-    proName NVARCHAR(50) NOT NULL,
-    duration INT NOT NULL,
-    tags NVARCHAR(20),
-    profile TEXT DEFAULT N'无简介'
-);
-CREATE TABLE Seats
-(
-    Id INT PRIMARY KEY NOT NULL IDENTITY,
-    theaterID INT NOT NULL,
-    status BIT DEFAULT 1 NOT NULL,
-    rowNumber INT DEFAULT 1 NOT NULL,
-    colNumber INT DEFAULT 1 NOT NULL,
-    CONSTRAINT theaterID FOREIGN KEY (theaterID) REFERENCES Theaters (Id)
-);
-CREATE TABLE Theaters
-(
-    Id INT PRIMARY KEY NOT NULL IDENTITY,
-    theaterName NVARCHAR(30) DEFAULT N'影厅' NOT NULL,
-    theaterLocation NVARCHAR(30) DEFAULT N'中国' NOT NULL,
-    theaterMapSite NVARCHAR(30) DEFAULT 'https://gaode.com',
-    theaterAdminID INT,
-    seatRowCount INT DEFAULT 0 NOT NULL,
-    seatColCount INT DEFAULT 0 NOT NULL,
-    CONSTRAINT theaterAdminID FOREIGN KEY (theaterAdminID) REFERENCES Users (Id)
-);
-CREATE UNIQUE INDEX un_theaterName ON Theaters (theaterName);
-CREATE TABLE Tickets
-(
-    Id INT PRIMARY KEY NOT NULL IDENTITY,
-    status INT DEFAULT 0 NOT NULL,
-    seatID INT NOT NULL,
-    goodID INT NOT NULL,
-    CONSTRAINT tic_seatId FOREIGN KEY (seatID) REFERENCES Seats (Id),
-    CONSTRAINT tic_goodId FOREIGN KEY (goodID) REFERENCES Goods (Id)
-);
-CREATE INDEX index_goodId ON Tickets (goodID);
-CREATE TABLE UserIPs
-(
-    ip VARCHAR(20) PRIMARY KEY NOT NULL,
-    limitTimes INT DEFAULT 500 NOT NULL
-);
-CREATE TABLE Users
-(
-    Id INT PRIMARY KEY NOT NULL IDENTITY,
-    userName NVARCHAR(30) NOT NULL,
-    userAccount NVARCHAR(15) NOT NULL,
-    userPassword NVARCHAR(15) NOT NULL,
-    signUpTime DATETIME NOT NULL,
-    lastSigninTime DATETIME NOT NULL,
-    userLevel NVARCHAR(15) NOT NULL,
-    userSex NVARCHAR(10),
-    userAvatar VARBINARY(4096),
-    userTel NVARCHAR(12),
-    theaterId INT DEFAULT (-1) NOT NULL
-);
-CREATE PROCEDURE sp_CreateGood(@programmeId INT, @theaterId INT, @performance SYSNAME, @playDate DATE, @price MONEY, @message VARCHAR);
-CREATE PROCEDURE sp_CreateProgramme(@proName SYSNAME, @duration INT, @tags SYSNAME, @profile TEXT, @message SYSNAME);
-CREATE PROCEDURE sp_CreateSeat(@theaterID INT, @rowNumber INT, @colNumber INT, @message VARCHAR);
-CREATE PROCEDURE sp_CreateTheater(@theaterName SYSNAME, @location SYSNAME, @mapSite SYSNAME, @adminId INT, @seatRowsCount INT, @seatColsCount INT, @message VARCHAR);
-CREATE PROCEDURE sp_CreateUser(@name SYSNAME, @account SYSNAME, @password SYSNAME, @level SYSNAME, @sex SYSNAME, @tel SYSNAME, @message VARCHAR, @theaterId INT);
-CREATE PROCEDURE sp_DeleteGood(@goodId INT, @message VARCHAR);
-CREATE PROCEDURE sp_DeleteProgramme(@programmeId INT, @message VARCHAR);
-CREATE PROCEDURE sp_DeleteSeat(@seatId INT, @message VARCHAR);
-CREATE PROCEDURE sp_DeleteTheater(@theaterId INT, @message VARCHAR);
-CREATE PROCEDURE sp_DeleteUser(@userId INT, @message VARCHAR);
-CREATE PROCEDURE sp_GetAllGood(@message VARCHAR);
-CREATE PROCEDURE sp_GetAllOrder(@message VARCHAR);
-CREATE PROCEDURE sp_GetAllProgramme(@message VARCHAR);
-CREATE PROCEDURE sp_GetAllSeat(@message VARCHAR);
-CREATE PROCEDURE sp_GetAllTheater(@message VARCHAR);
-CREATE PROCEDURE sp_GetAllUser(@message VARCHAR);
-CREATE PROCEDURE sp_Login(@account SYSNAME, @password SYSNAME, @message VARCHAR);
-CREATE PROCEDURE sp_QueryGood(@goodId INT, @message VARCHAR);
-CREATE PROCEDURE sp_QueryProgramme(@programmeName SYSNAME, @programmeId INT, @message VARCHAR);
-CREATE PROCEDURE sp_QuerySeat(@theaterId INT, @rowNumber INT, @colNumber INT, @seatId INT, @message VARCHAR);
-CREATE PROCEDURE sp_QueryTheater(@theaterName SYSNAME, @theaterId INT, @message VARCHAR);
-CREATE PROCEDURE sp_QueryTicket(@ticketId INT, @message VARCHAR);
-CREATE PROCEDURE sp_QueryUser(@account SYSNAME, @userId INT, @message VARCHAR);
-CREATE PROCEDURE sp_ReturnedTicket(@ticketId INT, @userId INT, @message VARCHAR);
-CREATE PROCEDURE sp_SelectGood(@theaterId INT, @programmeId INT, @playDate DATE, @performance SYSNAME, @message VARCHAR);
-CREATE PROCEDURE sp_SelectOrder(@theaterId INT, @userId INT, @playDate DATE, @type INT, @message VARCHAR);
-CREATE PROCEDURE sp_SelectProgramme(@tags SYSNAME, @message VARCHAR);
-CREATE PROCEDURE sp_SelectTicket(@theaterId INT, @playDate DATE, @performance SYSNAME, @message VARCHAR);
-CREATE PROCEDURE sp_SellTicket(@ticketId INT, @userId INT, @message VARCHAR);
-CREATE PROCEDURE sp_UpdateSeatStatus(@seatID INT, @status BIT, @message VARCHAR);
-CREATE PROCEDURE sp_UpdateTheater(@theaterId INT, @newAdminId INT, @message VARCHAR);
-CREATE PROCEDURE sp_UpdateUser(@userId INT, @newLevel SYSNAME, @newTel SYSNAME, @newPassword SYSNAME, @message VARCHAR);
-(
-    Id INT PRIMARY KEY NOT NULL IDENTITY,
-    proID INT NOT NULL,
-    theaterID INT NOT NULL,
-    performance NVARCHAR(10) DEFAULT N'早一' NOT NULL,
-    playdate DATE DEFAULT '1-1-2017' NOT NULL,
-    price MONEY DEFAULT '0' NOT NULL,
-    CONSTRAINT goods_proId FOREIGN KEY (proID) REFERENCES Programmes (Id),
-    CONSTRAINT goods_theaterId FOREIGN KEY (theaterID) REFERENCES Theaters (Id)
-);
-CREATE TABLE Orders
-(
-    Id INT PRIMARY KEY NOT NULL IDENTITY,
-    ticketID INT NOT NULL,
-    userID INT NOT NULL,
-    type INT DEFAULT 1 NOT NULL,
-    time DATETIME DEFAULT getdate() NOT NULL,
-    theaterID INT NOT NULL,
-    CONSTRAINT order_ticketID FOREIGN KEY (ticketID) REFERENCES Tickets (Id),
-    CONSTRAINT order_userID FOREIGN KEY (userID) REFERENCES Users (Id)
-);
-CREATE INDEX index_order ON Orders (userID, theaterID);
-CREATE TABLE Programmes
-(
-    Id INT PRIMARY KEY NOT NULL IDENTITY,
-    proName NVARCHAR(50) NOT NULL,
-    duration INT NOT NULL,
-    tags NVARCHAR(20),
-    profile TEXT DEFAULT N'无简介'
-);
-CREATE TABLE Seats
-(
-    Id INT PRIMARY KEY NOT NULL IDENTITY,
-    theaterID INT NOT NULL,
-    status BIT DEFAULT 1 NOT NULL,
-    rowNumber INT DEFAULT 1 NOT NULL,
-    colNumber INT DEFAULT 1 NOT NULL,
-    CONSTRAINT theaterID FOREIGN KEY (theaterID) REFERENCES Theaters (Id)
-);
-CREATE TABLE Theaters
-(
-    Id INT PRIMARY KEY NOT NULL IDENTITY,
-    theaterName NVARCHAR(30) DEFAULT N'影厅' NOT NULL,
-    theaterLocation NVARCHAR(30) DEFAULT N'中国' NOT NULL,
-    theaterMapSite NVARCHAR(30) DEFAULT 'https://gaode.com',
-    theaterAdminID INT,
-    seatRowCount INT DEFAULT 0 NOT NULL,
-    seatColCount INT DEFAULT 0 NOT NULL,
-    CONSTRAINT theaterAdminID FOREIGN KEY (theaterAdminID) REFERENCES Users (Id)
-);
-CREATE UNIQUE INDEX un_theaterName ON Theaters (theaterName);
-CREATE TABLE Tickets
-(
-    Id INT PRIMARY KEY NOT NULL IDENTITY,
-    status INT DEFAULT 0 NOT NULL,
-    seatID INT NOT NULL,
-    goodID INT NOT NULL,
-    CONSTRAINT tic_seatId FOREIGN KEY (seatID) REFERENCES Seats (Id),
-    CONSTRAINT tic_goodId FOREIGN KEY (goodID) REFERENCES Goods (Id)
-);
-CREATE INDEX index_goodId ON Tickets (goodID);
-CREATE TABLE UserIPs
-(
-    ip VARCHAR(20) PRIMARY KEY NOT NULL,
-    limitTimes INT DEFAULT 500 NOT NULL
-);
-CREATE TABLE Users
-(
-    Id INT PRIMARY KEY NOT NULL IDENTITY,
-    userName NVARCHAR(30) NOT NULL,
-    userAccount NVARCHAR(15) NOT NULL,
-    userPassword NVARCHAR(15) NOT NULL,
-    signUpTime DATETIME NOT NULL,
-    lastSigninTime DATETIME NOT NULL,
-    userLevel NVARCHAR(15) NOT NULL,
-    userSex NVARCHAR(10),
-    userAvatar VARBINARY(4096),
-    userTel NVARCHAR(12)
-);
-CREATE PROCEDURE sp_CreateGood(@programmeId INT, @theaterId INT, @performance SYSNAME, @playDate DATE, @price MONEY, @message VARCHAR);
-CREATE PROCEDURE sp_CreateProgramme(@proName SYSNAME, @duration INT, @tags SYSNAME, @profile TEXT, @message SYSNAME);
-CREATE PROCEDURE sp_CreateSeat(@theaterID INT, @rowNumber INT, @colNumber INT, @message VARCHAR);
-CREATE PROCEDURE sp_CreateTheater(@theaterName SYSNAME, @location SYSNAME, @mapSite SYSNAME, @adminId INT, @seatRowsCount INT, @seatColsCount INT, @message VARCHAR);
-CREATE PROCEDURE sp_CreateUser(@name SYSNAME, @account SYSNAME, @password SYSNAME, @level SYSNAME, @sex SYSNAME, @tel SYSNAME, @message VARCHAR);
-CREATE PROCEDURE sp_DeleteGood(@goodId INT, @message VARCHAR);
-CREATE PROCEDURE sp_DeleteProgramme(@programmeId INT, @message VARCHAR);
-CREATE PROCEDURE sp_DeleteSeat(@seatId INT, @message VARCHAR);
-CREATE PROCEDURE sp_DeleteTheater(@theaterId INT, @message VARCHAR);
-CREATE PROCEDURE sp_DeleteUser(@userId INT, @message VARCHAR);
-CREATE PROCEDURE sp_GetAllGood(@message VARCHAR);
-CREATE PROCEDURE sp_GetAllProgramme(@message VARCHAR);
-CREATE PROCEDURE sp_GetAllSeat(@message VARCHAR);
-CREATE PROCEDURE sp_GetAllTheater(@message VARCHAR);
-CREATE PROCEDURE sp_GetAllUser(@message VARCHAR);
-CREATE PROCEDURE sp_GetTickets(@theaterId INT, @playDate DATE, @performance SYSNAME, @message VARCHAR);
-CREATE PROCEDURE sp_Login(@account SYSNAME, @password SYSNAME, @message VARCHAR);
-CREATE PROCEDURE sp_QueryGood(@goodId INT, @message VARCHAR);
-CREATE PROCEDURE sp_QueryProgramme(@programmeName SYSNAME, @programmeId INT, @message VARCHAR);
-CREATE PROCEDURE sp_QuerySeat(@theaterId INT, @rowNumber INT, @colNumber INT, @seatId INT, @message VARCHAR);
-CREATE PROCEDURE sp_QueryTheater(@theaterName SYSNAME, @theaterId INT, @message VARCHAR);
-CREATE PROCEDURE sp_QueryUser(@account SYSNAME, @userId INT, @message VARCHAR);
-CREATE PROCEDURE sp_SelectGood(@theaterId INT, @programmeId INT, @playDate DATE, @performance SYSNAME, @message VARCHAR);
-CREATE PROCEDURE sp_SelectProgramme(@tags SYSNAME, @message VARCHAR);
-CREATE PROCEDURE sp_UpdateSeatStatus(@seatID INT, @status BIT, @message VARCHAR);
-CREATE PROCEDURE sp_UpdateTheater(@theaterId INT, @newAdminId INT, @message VARCHAR);
-CREATE PROCEDURE sp_UpdateUser(@userId INT, @newLevel SYSNAME, @newTel SYSNAME, @newPassword SYSNAME, @message VARCHAR);reate table TTMS.dbo.Users
+create table TTMS.dbo.Users
 (
 	Id int identity
 		primary key,
@@ -231,7 +13,8 @@ CREATE PROCEDURE sp_UpdateUser(@userId INT, @newLevel SYSNAME, @newTel SYSNAME, 
 	userSex nvarchar(10)
 		check ([userSex]=N'女' OR [userSex]=N'男'),
 	userAvatar varbinary(4096),
-	userTel nvarchar(12)
+	userTel nvarchar(12),
+	theaterId int default (-1) not null
 )
 go
 
@@ -288,6 +71,11 @@ go
 declare @sn nvarchar(30)
 set @sn = schema_name()
 execute sp_addextendedproperty N'MS_Description', N'用户电话', N'SCHEMA', @sn, N'TABLE', N'Users', N'COLUMN', N'userTel'
+go
+
+declare @sn nvarchar(30)
+set @sn = schema_name()
+execute sp_addextendedproperty N'MS_Description', N'用户所在影厅', N'SCHEMA', @sn, N'TABLE', N'Users', N'COLUMN', N'theaterId'
 go
 
 create table TTMS.dbo.Theaters
@@ -541,7 +329,6 @@ create table TTMS.dbo.Tickets
 	Id int identity
 		constraint PK__Ticket__3214EC074E8B6DD7
 			primary key,
-	price money not null,
 	status int default 0 not null
 		constraint ticket_ticketstatus
 			check ([status]=2 OR [status]=1 OR [status]=0),
@@ -614,6 +401,51 @@ create table TTMS.dbo.Goods
 	playdate date default '1-1-2017' not null,
 	price money default '0' not null
 )
+go
+
+CREATE TRIGGER tr_initTicket
+ON TTMS.dbo.Goods
+AFTER INSERT
+AS
+BEGIN
+  DECLARE @goodId INT
+
+  DECLARE @seatId INT
+
+  DECLARE @theaterId INT
+
+  SET @goodId = (SELECT inserted.Id
+                 FROM INSERTED)
+
+  SET @theaterId = (SELECT theaterID
+                    FROM Goods
+                    WHERE Goods.Id = @goodId)
+
+  DECLARE cur_seatId CURSOR LOCAL READ_ONLY FORWARD_ONLY DYNAMIC FOR
+    SELECT Id
+    FROM TTMS.dbo.Seats
+    WHERE theaterID = @theaterId
+          AND status = 1 --万恶之源游标
+  OPEN cur_seatId --打开游标
+  WHILE @@FETCH_STATUS = 0
+    BEGIN
+
+      FETCH NEXT FROM cur_seatId
+      INTO @seatId
+
+      INSERT INTO Tickets (status, seatID, goodID) VALUES (1, @seatId, @goodId)
+
+    END
+
+  CLOSE cur_seatId
+  DEALLOCATE cur_seatId
+END
+go
+
+CREATE TRIGGER tr_dropTicket ON Goods
+  AFTER DELETE 
+  AS 
+  DELETE Tickets WHERE goodID = (SELECT Id FROM deleted)
 go
 
 declare @sn nvarchar(30)
@@ -812,30 +644,41 @@ BEGIN CATCH
 END CATCH
 go
 
-CREATE PROCEDURE [dbo].[sp_CreateUser] 
-@name nvarchar(30) , @account nvarchar(15) , @password nvarchar(15) ,
-@level nvarchar(10) , @sex nvarchar(10) , @tel nvarchar(12),
-@message varchar(30) OUTPUT
-as
-
-if not exists(select 1 from Users where userAccount = @account)
-begin
-	begin try
-		insert into Users values
-		(@name , @account , @password , getdate() , getdate() , @level , @sex , null , @tel);
-		set @message = 'successful'
-		return 200
-	end try
-	begin catch
-		set @message = ERROR_MESSAGE()
-		return ERROR_NUMBER()
-	end catch
-end
-else
-begin
-	set @message = 'the user is exists'
-	return 400
-end
+CREATE PROCEDURE [dbo].[sp_CreateUser]
+  @name    NVARCHAR(30), @account NVARCHAR(15), @password NVARCHAR(15),
+  @level   NVARCHAR(10), @sex NVARCHAR(10), @tel NVARCHAR(12), @theaterId INT,
+  @message VARCHAR(30) OUTPUT
+AS
+IF EXISTS(SELECT 1
+          FROM Theaters
+          WHERE @theaterId = Id) OR @theaterId = -1
+  BEGIN
+    IF NOT exists(SELECT 1
+                  FROM Users
+                  WHERE userAccount = @account)
+      BEGIN
+        BEGIN TRY
+        INSERT INTO Users VALUES
+          (@name, @account, @password, getdate(), getdate(), @level, @sex, NULL, @tel, @theaterId);
+        SET @message = 'successful'
+        RETURN 200
+        END TRY
+        BEGIN CATCH
+        SET @message = ERROR_MESSAGE()
+        RETURN ERROR_NUMBER()
+        END CATCH
+      END
+    ELSE
+      BEGIN
+        SET @message = 'the user is exists'
+        RETURN 400
+      END
+  END
+ELSE
+  BEGIN
+    SET @message = 'the theater is not exists'
+    RETURN 404
+  END
 go
 
 CREATE PROCEDURE [dbo].[sp_CreateSeat]
@@ -1224,25 +1067,26 @@ END CATCH
 go
 
 CREATE PROCEDURE [dbo].[sp_SelectGood]
-	@theaterId INT = NULL , 
-	@programmeId INT = NULL , 
-	@playDate DATE = NULL , 
-	@performance NVARCHAR(10) = NULL ,
-	@message VARCHAR(30) OUTPUT
+    @theaterId   INT = NULL,
+    @programmeId INT = NULL,
+    @playDate    DATE = NULL,
+    @performance NVARCHAR(10) = NULL,
+    @message     VARCHAR(30) OUTPUT
 AS
-BEGIN TRY
-	SELECT * FROM Goods
-	WHERE (@theaterId IS NULL OR theaterID = @theaterId)
-		AND (@programmeId IS NULL OR proID = @programmeId)
-		AND (@playDate IS NULL OR playDate = @playDate)
-		AND (@performance IS NULL OR performance = @performance)
-	SET @message = 'successful'
-	RETURN 200 --
-END TRY
-BEGIN CATCH
-	SET @message = ERROR_MESSAGE()
-	RETURN ERROR_NUMBER()
-END CATCH
+  BEGIN TRY
+  SELECT *
+  FROM Goods
+  WHERE (@theaterId IS NULL OR theaterID = @theaterId)
+        AND (@programmeId IS NULL OR proID = @programmeId)
+        AND (@playDate IS NULL OR playDate = @playDate)
+        AND (@performance IS NULL OR performance = @performance)
+  SET @message = 'successful'
+  RETURN 200 --
+  END TRY
+  BEGIN CATCH
+  SET @message = ERROR_MESSAGE()
+  RETURN ERROR_NUMBER()
+  END CATCH
 go
 
 CREATE PROCEDURE [dbo].[sp_DeleteGood]
@@ -1266,6 +1110,199 @@ BEGIN
 	SET @message = 'the good is not exists'
 	RETURN 404
 END
+go
+
+CREATE PROC sp_SellTicket
+    @ticketId INT,
+    @userId   INT,
+    @message  VARCHAR(30) OUTPUT
+AS
+  IF EXISTS(SELECT 1
+            FROM Tickets
+            WHERE @ticketId = Id)
+    BEGIN
+      DECLARE @status INT = 0
+      SET @status = (SELECT status
+                     FROM Tickets
+                     WHERE @ticketId = Id)
+      DECLARE @theaterId INT
+      SET @theaterId = (SELECT theaterID
+                        FROM Tickets
+                          JOIN Goods ON Tickets.goodID = Goods.Id
+                        WHERE @ticketId = Tickets.Id)
+      IF (@status = 0 OR @status = 2)
+        BEGIN
+          SET @message = 'the ticket is sell'
+          RETURN 400 --请求错误 , 因为票状态为已售
+        END
+      ELSE
+        BEGIN
+          UPDATE Tickets
+          SET status = 0
+          WHERE @ticketId = Id --更改票状态
+
+          INSERT INTO Orders (ticketID, userID, type, time, theaterID)  --插入一条交易记录
+          VALUES (@ticketId, @userId, 1, GETDATE(), @theaterID);
+
+          SET @message = 'successful'
+          RETURN 200
+        END
+    END
+  ELSE
+    BEGIN
+      SET @message = 'the ticket is not exists'
+      RETURN 200
+    END
+go
+
+CREATE PROC sp_QueryTicket
+    @ticketId INT,
+    @message  VARCHAR(30) OUTPUT
+AS
+  BEGIN TRY
+  SELECT
+      Name = Programmes.proName,
+      Duration = Programmes.duration,
+      Tags = Programmes.tags,
+      Profile = Programmes.profile,
+      Performance = performance,
+      Date = playdate,
+      Price = price,
+      TheaterName = theaterName,
+      SeatRowNumber = rowNumber,
+      SeatColNumber = colNumber,
+      Status = Tickets.status
+  FROM Tickets
+    JOIN Goods ON Tickets.goodID = Goods.Id
+    JOIN Programmes ON Goods.proID = Programmes.Id
+    JOIN Seats ON Tickets.seatID = Seats.Id
+    JOIN Theaters ON Goods.theaterID = Theaters.Id
+  WHERE @ticketId = Tickets.Id
+  SET @message = 'successful'
+  RETURN 200
+  END TRY
+  BEGIN CATCH
+  SET @message = error_message()
+  RETURN ERROR_NUMBER()
+  END CATCH
+go
+
+CREATE PROC sp_SelectTicket
+    @theaterId   INT,
+    @playDate    DATE,
+    @performance NVARCHAR(10),
+    @message     VARCHAR(30) OUTPUT
+AS
+  BEGIN TRY
+  SELECT
+    Name = Programmes.proName,
+    Duration = Programmes.duration,
+    Tags = Programmes.tags,
+    Profile = Programmes.profile,
+    Performance = performance,
+    Date = playdate,
+    Price = price,
+    TheaterName = theaterName,
+    SeatRowNumber = rowNumber,
+    SeatColNumber = colNumber,
+    Status = Tickets.status
+  FROM Tickets
+    JOIN Goods ON Tickets.goodID = Goods.Id
+    JOIN Programmes ON Goods.proID = Programmes.Id
+    JOIN Seats ON Tickets.seatID = Seats.Id
+    JOIN Theaters ON Goods.theaterID = Theaters.Id
+  WHERE @theaterId = Goods.theaterID
+        AND @playDate = playdate
+        AND @performance = performance
+  SET @message = 'successful'
+  RETURN 200
+  END TRY
+  BEGIN CATCH
+  SET @message = error_message()
+  RETURN ERROR_NUMBER()
+  END CATCH
+go
+
+CREATE PROC sp_ReturnedTicket
+    @ticketId INT,
+    @userId   INT,
+    @message  VARCHAR(30) OUTPUT
+AS
+  IF EXISTS(SELECT 1
+            FROM Tickets
+            WHERE @ticketId = Id)
+    BEGIN
+      DECLARE @status INT = 1
+      SET @status = (SELECT status
+                     FROM Tickets
+                     WHERE @ticketId = Id)
+      DECLARE @theaterId INT
+      SET @theaterId = (SELECT theaterID
+                        FROM Tickets
+                          JOIN Goods ON Tickets.goodID = Goods.Id
+                        WHERE @ticketId = Tickets.Id)
+      IF (@status = 1)
+        BEGIN
+          SET @message = 'the ticket is ready to sell'
+          RETURN 400 --请求错误 , 因为票状态为已售
+        END
+      ELSE
+        BEGIN
+          UPDATE Tickets
+          SET status = 1
+          WHERE @ticketId = Id --更改票状态
+
+          INSERT INTO Orders (ticketID, userID, type, time, theaterID)  --插入一条交易记录
+          VALUES (@ticketId, @userId, 0 , GETDATE(), @theaterID);
+
+          SET @message = 'successful'
+          RETURN 200
+        END
+    END
+  ELSE
+    BEGIN
+      SET @message = 'the ticket is not exists'
+      RETURN 200
+    END
+go
+
+CREATE PROC sp_GetAllOrder
+    @message VARCHAR(30) OUTPUT
+AS
+  BEGIN TRY 
+    SELECT * FROM Orders
+    SET @message = 'successful'
+    RETURN 200
+  END TRY
+  BEGIN CATCH
+    SET @message = ERROR_MESSAGE()
+    RETURN ERROR_NUMBER()
+  END CATCH
+go
+
+CREATE PROC sp_SelectOrder
+    @theaterId INT = NULL,
+    @userId    INT = NULL,
+    @playDate  DATE = NULL,
+    @type      INT = NULL,
+    @message   VARCHAR(30) OUTPUT
+AS
+  BEGIN TRY
+  SELECT *
+  FROM Orders
+    JOIN Tickets ON Orders.ticketID = Tickets.Id
+    JOIN Goods ON Tickets.goodID = Goods.Id
+  WHERE (@theaterId IS NULL OR @theaterId = Orders.theaterID)
+        AND (@userId IS NULL OR @userId = userID)
+        AND (@playDate IS NULL OR @playDate = playdate)
+        AND (@type IS NULL OR @type = type)
+  SET @message = 'successful'
+  RETURN 200
+  END TRY
+  BEGIN CATCH
+  SET @message = ERROR_MESSAGE()
+  RETURN ERROR_NUMBER()
+  END CATCH
 go
 
 
