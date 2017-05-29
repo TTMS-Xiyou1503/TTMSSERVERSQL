@@ -497,7 +497,7 @@ BEGIN
 	IF(@newLevel IS NOT NULL)
 		UPDATE users SET userLevel = @newLevel WHERE Id = @userId 
 	IF(@newTel IS NOT NULL)
-		UPDATE users SET userTel = @newLevel WHERE Id = @userId
+		UPDATE users SET userTel = @newTel WHERE Id = @userId
 	IF(@newPassword IS NOT NULL)
 		UPDATE users SET userPassword = @newPassword WHERE Id = @userId
 	set @message = 'update successful'
