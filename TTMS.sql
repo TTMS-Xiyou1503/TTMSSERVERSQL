@@ -12,9 +12,9 @@ create table TTMS.dbo.Users
 			check ([userLevel]=N'售票员' OR [userLevel]=N'剧院经理' OR [userLevel]=N'系统管理员'),
 	userSex nvarchar(10)
 		check ([userSex]=N'女' OR [userSex]=N'男'),
-	userAvatar varbinary(4096),
 	userTel nvarchar(12),
-	theaterId int default (-1) not null
+	theaterId int default (-1) not null,
+	userAvatar varbinary(900) default NULL
 )
 go
 
@@ -61,11 +61,6 @@ go
 declare @sn nvarchar(30)
 set @sn = schema_name()
 execute sp_addextendedproperty N'MS_Description', N'用户性别', N'SCHEMA', @sn, N'TABLE', N'Users', N'COLUMN', N'userSex'
-go
-
-declare @sn nvarchar(30)
-set @sn = schema_name()
-execute sp_addextendedproperty N'MS_Description', N'用户头像', N'SCHEMA', @sn, N'TABLE', N'Users', N'COLUMN', N'userAvatar'
 go
 
 declare @sn nvarchar(30)
@@ -486,6 +481,47 @@ go
 alter table Tickets
 	add constraint tic_goodId
 		foreign key (goodID) references Goods
+go
+
+create table TTMS.dbo.session
+(
+	Id nvarchar(900) not null
+		primary key,
+	Value varbinary not null,
+	ExpiresAtTime datetimeoffset not null,
+	SlidingExpirationInSeconds bigint,
+	AbsoluteExpiration datetimeoffset
+)
+go
+
+create unique index session_Id_uindex
+	on session (Id)
+go
+
+create table TTMS.dbo.PlayBills
+(
+	Id int identity
+		primary key,
+	programmeId int not null
+		constraint PlayBills_Programme__fk
+			references Programmes,
+	imagePath varchar(100) default 'https://image.baidu.com' not null
+)
+go
+
+declare @sn nvarchar(30)
+set @sn = schema_name()
+execute sp_addextendedproperty N'MS_Description', N'图片ID', N'SCHEMA', @sn, N'TABLE', N'PlayBills', N'COLUMN', N'Id'
+go
+
+declare @sn nvarchar(30)
+set @sn = schema_name()
+execute sp_addextendedproperty N'MS_Description', N'图片类型', N'SCHEMA', @sn, N'TABLE', N'PlayBills', N'COLUMN', N'programmeId'
+go
+
+declare @sn nvarchar(30)
+set @sn = schema_name()
+execute sp_addextendedproperty N'MS_Description', N'图片位置', N'SCHEMA', @sn, N'TABLE', N'PlayBills', N'COLUMN', N'imagePath'
 go
 
 CREATE PROCEDURE [dbo].[sp_UpdateUser]
@@ -967,6 +1003,7 @@ AS
 IF EXISTS(SELECT 1 FROM Programmes WHERE Id = @ProgrammeId)
 BEGIN
 	BEGIN TRY
+		EXEC sp_DeletePlayBill @programmeId , @message
 		DELETE Programmes WHERE Id = @ProgrammeId
 		SET @message = 'successful'
 		RETURN 204
@@ -1303,6 +1340,95 @@ AS
   SET @message = ERROR_MESSAGE()
   RETURN ERROR_NUMBER()
   END CATCH
+go
+
+CREATE PROC sp_CreatePlayBill
+  @programmeId INT ,
+  @imagePath VARCHAR(100) , 
+  @message VARCHAR(30) OUTPUT 
+  AS
+IF EXISTS(SELECT 1 FROM Programmes WHERE @programmeId = Id)
+BEGIN
+  BEGIN TRY 
+    INSERT INTO PlayBills (programmeId, imagePath) VALUES (@programmeId , @imagePath)
+    SET @message = 'successful'
+    RETURN 200
+  END TRY
+  BEGIN CATCH
+    SET @message = ERROR_MESSAGE()
+    RETURN ERROR_NUMBER()
+  END CATCH
+END
+ELSE
+BEGIN
+  SET @message = 'the programme is not exists'
+  RETURN 404
+END
+go
+
+CREATE PROC sp_SelectPlayBill
+    @programmeId INT,
+    @message     VARCHAR(30) OUTPUT
+AS
+  IF EXISTS(SELECT 1
+            FROM Programmes
+            WHERE @programmeId = Id)
+    BEGIN
+      BEGIN TRY
+      SELECT *
+      FROM PlayBills
+      WHERE @programmeId = programmeId
+      SET @message = 'successful'
+      RETURN 200
+      END TRY
+      BEGIN CATCH
+      SET @message = ERROR_MESSAGE()
+      RETURN ERROR_NUMBER()
+      END CATCH
+    END
+  ELSE
+    BEGIN
+      SET @message = 'the programme is not exists'
+      RETURN 404
+    END
+go
+
+CREATE PROC sp_DeletePlayBill
+    @programmeId INT,
+    @message VARCHAR(30) OUTPUT
+AS
+  IF EXISTS(SELECT 1 FROM Programmes WHERE @programmeId = Id)
+BEGIN
+  BEGIN TRY
+    DELETE PlayBills WHERE programmeId = @programmeId
+    SET @message = 'successful'
+    RETURN 200
+  END TRY
+  BEGIN CATCH
+    SET @message = ERROR_MESSAGE()
+    RETURN ERROR_NUMBER()
+  END CATCH
+END
+ELSE
+BEGIN
+  SET @message = 'the programme is not exists'
+  RETURN 404
+END
+go
+
+CREATE PROC sp_GetAllTags
+  @message VARCHAR(30) OUTPUT
+  AS
+  BEGIN TRY
+	SELECT DISTINCT tags
+	FROM Programmes
+	SET @message = 'successful'
+	RETURN 200 --
+END TRY
+BEGIN CATCH
+	SET @message = ERROR_MESSAGE()
+	RETURN ERROR_NUMBER()
+END CATCH
 go
 
 
