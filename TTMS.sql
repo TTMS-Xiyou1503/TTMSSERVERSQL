@@ -82,8 +82,8 @@ create table TTMS.dbo.Theaters
 			unique,
 	theaterLocation nvarchar(30) default N'中国' not null,
 	theaterMapSite nvarchar(30) default 'https://gaode.com',
-	theaterAdminID int
-		constraint theaterAdminID
+	theaterAdminID int default (-1)
+		constraint FK_Theaters_Users
 			references Users,
 	seatRowCount int default 0 not null,
 	seatColCount int default 0 not null
@@ -176,9 +176,7 @@ create table TTMS.dbo.Seats
 (
 	Id int identity
 		primary key,
-	theaterID int not null
-		constraint theaterID
-			references Theaters,
+	theaterID int not null,
 	status bit default 1 not null
 		constraint check_seatstatus
 			check ([status]=0 OR [status]=1),
@@ -330,7 +328,8 @@ create table TTMS.dbo.Tickets
 	seatID int not null
 		constraint tic_seatId
 			references Seats,
-	goodID int not null
+	goodID int not null,
+	time datetime default (1970-1)-1 not null
 )
 go
 
@@ -361,6 +360,11 @@ go
 declare @sn nvarchar(30)
 set @sn = schema_name()
 execute sp_addextendedproperty N'MS_Description', N'商品ID', N'SCHEMA', @sn, N'TABLE', N'Tickets', N'COLUMN', N'goodID'
+go
+
+declare @sn nvarchar(30)
+set @sn = schema_name()
+execute sp_addextendedproperty N'MS_Description', N'时间戳，用作并发操作', N'SCHEMA', @sn, N'TABLE', N'Tickets', N'COLUMN', N'time'
 go
 
 alter table Orders
@@ -613,27 +617,30 @@ BEGIN
 END
 go
 
-CREATE PROCEDURE [dbo].[sp_DeleteUser]  
-@userId INT,
-@message varchar(30) OUTPUT
-as
-if exists(select 1 from Users where Id = @userId)
-begin
-	begin try
-		DELETE Users WHERE Id = @userId
-		set @message = 'successful'
-		return 204
-	end try
-	begin catch
-		set @message = ERROR_MESSAGE()
-		return ERROR_NUMBER()
-	end catch
-end
-else
-begin
-	set @message = 'the user is not exists'
-	return 404
-end
+CREATE PROCEDURE [dbo].[sp_DeleteUser]
+    @userId  INT,
+    @message VARCHAR(30) OUTPUT
+AS
+  IF exists(SELECT 1
+            FROM Users
+            WHERE Id = @userId)
+    BEGIN
+      BEGIN TRY
+      DELETE Users
+      WHERE Id = @userId
+      SET @message = 'successful'
+      RETURN 204
+      END TRY
+      BEGIN CATCH
+      SET @message = ERROR_MESSAGE()
+      RETURN ERROR_NUMBER()
+      END CATCH
+    END
+  ELSE
+    BEGIN
+      SET @message = 'the user is not exists'
+      RETURN 404
+    END
 go
 
 CREATE PROCEDURE [dbo].[sp_login] 
@@ -695,7 +702,7 @@ IF EXISTS(SELECT 1
       BEGIN
         BEGIN TRY
         INSERT INTO Users VALUES
-          (@name, @account, @password, getdate(), getdate(), @level, @sex, NULL, @tel, @theaterId);
+          (@name, @account, @password, getdate(), getdate(), @level, @sex, @tel, @theaterId , NULL);
         SET @message = 'successful'
         RETURN 200
         END TRY
@@ -980,7 +987,8 @@ BEGIN
 		INSERT INTO Programmes
 			(proName , duration , tags , profile)
 			VALUES
-			(@proName , @duration , @tags , @profile)
+			(@proName , @duration , @tags , @profile) --插入剧目
+
 		SET @message = 'successful'
 		RETURN 200
 	END TRY
@@ -1151,38 +1159,33 @@ go
 
 CREATE PROC sp_SellTicket
     @ticketId INT,
-    @userId   INT,
     @message  VARCHAR(30) OUTPUT
 AS
-  IF EXISTS(SELECT 1
+  BEGIN TRY
+    IF EXISTS(SELECT 1
             FROM Tickets
             WHERE @ticketId = Id)
     BEGIN
-      DECLARE @status INT = 0
-      SET @status = (SELECT status
-                     FROM Tickets
-                     WHERE @ticketId = Id)
-      DECLARE @theaterId INT
-      SET @theaterId = (SELECT theaterID
-                        FROM Tickets
-                          JOIN Goods ON Tickets.goodID = Goods.Id
-                        WHERE @ticketId = Tickets.Id)
-      IF (@status = 0 OR @status = 2)
+      DECLARE @time DATETIME, @status INT
+      SELECT
+        @time = time,
+        @status = status
+      FROM Tickets
+      WHERE @ticketId = Id
+
+      -- 判断当行中时间和现在时间差值超过15m ，则此票可用
+      IF (DATEADD(MM, 15, @time) < GETDATE() AND @status = 1)
         BEGIN
-          SET @message = 'the ticket is sell'
-          RETURN 400 --请求错误 , 因为票状态为已售
+          UPDATE Tickets --修改时间戳
+          SET time = GETDATE()
+          WHERE @ticketId = Id;
+          SET @message = 'successful'
+          RETURN 200
         END
       ELSE
         BEGIN
-          UPDATE Tickets
-          SET status = 0
-          WHERE @ticketId = Id --更改票状态
-
-          INSERT INTO Orders (ticketID, userID, type, time, theaterID)  --插入一条交易记录
-          VALUES (@ticketId, @userId, 1, GETDATE(), @theaterID);
-
-          SET @message = 'successful'
-          RETURN 200
+          SET @message = 'the ticket is sold'
+          RETURN 401
         END
     END
   ELSE
@@ -1190,11 +1193,64 @@ AS
       SET @message = 'the ticket is not exists'
       RETURN 200
     END
+  END TRY
+  BEGIN CATCH
+    SET @message = ERROR_MESSAGE()
+    RETURN ERROR_NUMBER()
+  END CATCH
 go
 
 CREATE PROC sp_QueryTicket
-    @ticketId INT,
-    @message  VARCHAR(30) OUTPUT
+  @ticketId INT,
+  @message  VARCHAR(30) OUTPUT
+AS
+BEGIN TRY
+DECLARE @time DATETIME, @status INT
+SELECT
+  @time = time,
+  @status = status
+FROM Tickets
+WHERE @ticketId = Id
+
+-- 判断当行中时间和现在时间差值超过13m ，则此票可用
+IF (DATEADD(MM, 15, @time) < GETDATE() AND @status = 1)
+  BEGIN
+    SET @status = 1
+  END
+ELSE
+  BEGIN
+    SET @status = 0
+  END
+SELECT
+    Name = Programmes.proName,
+    Duration = Programmes.duration,
+    Tags = Programmes.tags,
+    Profile = Programmes.profile,
+    Performance = performance,
+    Date = playdate,
+    Price = price,
+    TheaterName = theaterName,
+    SeatRowNumber = rowNumber,
+    SeatColNumber = colNumber,
+    Status = @status
+FROM Tickets
+  JOIN Goods ON Tickets.goodID = Goods.Id
+  JOIN Programmes ON Goods.proID = Programmes.Id
+  JOIN Seats ON Tickets.seatID = Seats.Id
+  JOIN Theaters ON Goods.theaterID = Theaters.Id
+WHERE @ticketId = Tickets.Id
+SET @message = 'successful'
+RETURN 200
+END TRY
+BEGIN CATCH
+SET @message = error_message()
+RETURN ERROR_NUMBER()
+END CATCH
+go
+
+CREATE PROC sp_SelectTicket
+    @goodId  INT,
+    @message VARCHAR(30) OUTPUT
 AS
   BEGIN TRY
   SELECT
@@ -1208,49 +1264,15 @@ AS
       TheaterName = theaterName,
       SeatRowNumber = rowNumber,
       SeatColNumber = colNumber,
-      Status = Tickets.status
+      Status = (SELECT 1
+                WHERE DATEADD(MINUTE, 15, Tickets.time) < GETDATE()
+                      AND Tickets.status = 1)
   FROM Tickets
     JOIN Goods ON Tickets.goodID = Goods.Id
     JOIN Programmes ON Goods.proID = Programmes.Id
     JOIN Seats ON Tickets.seatID = Seats.Id
     JOIN Theaters ON Goods.theaterID = Theaters.Id
-  WHERE @ticketId = Tickets.Id
-  SET @message = 'successful'
-  RETURN 200
-  END TRY
-  BEGIN CATCH
-  SET @message = error_message()
-  RETURN ERROR_NUMBER()
-  END CATCH
-go
-
-CREATE PROC sp_SelectTicket
-    @theaterId   INT,
-    @playDate    DATE,
-    @performance NVARCHAR(10),
-    @message     VARCHAR(30) OUTPUT
-AS
-  BEGIN TRY
-  SELECT
-    Name = Programmes.proName,
-    Duration = Programmes.duration,
-    Tags = Programmes.tags,
-    Profile = Programmes.profile,
-    Performance = performance,
-    Date = playdate,
-    Price = price,
-    TheaterName = theaterName,
-    SeatRowNumber = rowNumber,
-    SeatColNumber = colNumber,
-    Status = Tickets.status
-  FROM Tickets
-    JOIN Goods ON Tickets.goodID = Goods.Id
-    JOIN Programmes ON Goods.proID = Programmes.Id
-    JOIN Seats ON Tickets.seatID = Seats.Id
-    JOIN Theaters ON Goods.theaterID = Theaters.Id
-  WHERE @theaterId = Goods.theaterID
-        AND @playDate = playdate
-        AND @performance = performance
+  WHERE @goodId = goodID
   SET @message = 'successful'
   RETURN 200
   END TRY
@@ -1375,7 +1397,7 @@ AS
             WHERE @programmeId = Id)
     BEGIN
       BEGIN TRY
-      SELECT *
+      SELECT imagePath
       FROM PlayBills
       WHERE @programmeId = programmeId
       SET @message = 'successful'
@@ -1429,6 +1451,53 @@ BEGIN CATCH
 	SET @message = ERROR_MESSAGE()
 	RETURN ERROR_NUMBER()
 END CATCH
+go
+
+CREATE PROC sp_PayTicket
+    @ticketId INT,
+    @userId   INT,
+    @message  VARCHAR(30) OUTPUT
+AS
+  BEGIN TRY
+    IF EXISTS(SELECT 1
+            FROM Tickets
+            WHERE @ticketId = Id)
+    BEGIN
+      DECLARE @time DATETIME, @status INT
+      SELECT
+        @time = time,
+        @status = status
+      FROM Tickets
+      WHERE @ticketId = Id
+
+      -- 判断当票修改时间和现在时间差值超过15m 或者 票已经被付款  ，则超时
+      IF (DATEADD(MM, 15, @time) < GETDATE() OR @status = 0)
+        BEGIN
+          SET @message = 'time out'
+          RETURN 401
+        END
+
+      DECLARE @theaterId INT
+      SET @theaterId = (SELECT theaterID
+                        FROM Tickets
+                          JOIN Goods ON Tickets.goodID = Goods.Id
+                        WHERE @ticketId = Tickets.Id)
+
+      UPDATE Tickets
+      SET status = 0
+      WHERE @ticketId = Id --更改票状态
+
+      INSERT INTO Orders (ticketID, userID, type, time, theaterID)  --插入一条交易记录
+      VALUES (@ticketId, @userId, 1, GETDATE(), @theaterID);
+
+      SET @message = 'successful'
+      RETURN 200
+    END
+  END TRY
+  BEGIN CATCH
+    SET @message = ERROR_MESSAGE()
+    RETURN ERROR_NUMBER()
+  END CATCH
 go
 
 
