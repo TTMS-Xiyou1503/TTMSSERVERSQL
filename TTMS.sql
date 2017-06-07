@@ -1500,4 +1500,58 @@ AS
   END CATCH
 go
 
+CREATE PROCEDURE [dbo].[sp_SelectSeat]
+    @theaterId INT,
+    @message   VARCHAR(30) OUTPUT
+AS
+  BEGIN TRY
+  IF EXISTS(SELECT 1
+            FROM Theaters
+            WHERE @theaterId = Id)
+    BEGIN
+      SELECT *
+      FROM Seats
+      WHERE @theaterId = theaterID
+      SET @message = 'successful'
+      RETURN 200
+    END
+  ELSE
+    BEGIN
+      SET @message = 'the theater is not exists'
+      RETURN 404
+    END
+  END TRY
+  BEGIN CATCH
+  SET @message = ERROR_MESSAGE()
+  RETURN ERROR_NUMBER()
+  END CATCH
+go
+
+CREATE PROCEDURE [dbo].[sp_SelectUser]
+    @theaterId INT,
+    @message   VARCHAR(30) OUTPUT
+AS
+  BEGIN TRY
+  IF EXISTS(SELECT 1
+            FROM Theaters
+            WHERE Id = @theaterId)
+    BEGIN
+      SELECT *
+      FROM Users
+      WHERE @theaterId = theaterId
+      SET @message = 'successful'
+      RETURN 200
+    END
+  ELSE
+    BEGIN
+      SET @message = 'the theater is not exists'
+      RETURN 404
+    END
+  END TRY
+  BEGIN CATCH
+  SET @message = ERROR_MESSAGE()
+  RETURN ERROR_NUMBER()
+  END CATCH
+go
+
 
