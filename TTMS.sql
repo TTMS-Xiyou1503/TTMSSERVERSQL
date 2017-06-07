@@ -94,9 +94,9 @@ CREATE TRIGGER [dbo].[tr_initSeats] ON [dbo].[Theaters]
 WITH EXECUTE AS CALLER
 AFTER INSERT
 AS
-DECLARE @rowCount INT , @colCount INT , @curRowCount INT = 1 , @curColCount INT = 1 , @curCount INT = 1 , @theaterId INT 
+DECLARE @rowCount INT , @colCount INT , @curRowCount INT = 1 , @curColCount INT = 0 , @curCount INT = 1 , @theaterId INT
 SELECT @rowCount = seatRowCount, @colCount = seatColCount , @theaterId = Id FROM INSERTED
-WHILE(@curCount < @rowCount * @colCount)
+WHILE(@curCount <= @rowCount * @colCount)
 BEGIN
 	IF(@curColCount >= @colCount)
 	BEGIN
@@ -105,7 +105,7 @@ BEGIN
 	END
 	ELSE
 		SET @curColCount = @curColCount + 1
-	
+
 	EXEC sp_CreateSeat @theaterId , @curRowCount , @curColCount , 'NULL'
 	SET @curCount = @curCount + 1
 END
@@ -936,22 +936,20 @@ END CATCH
 go
 
 CREATE PROCEDURE [dbo].[sp_QuerySeat]
-	@theaterId INT = NULL, @rowNumber INT = NULL , @colNumber INT = NULL,
-	@seatId INT = NULL ,
-	@message varchar(30) OUTPUT
+    @seatId  INT,
+    @message VARCHAR(30) OUTPUT
 AS
-BEGIN TRY
-	select *
-	from Seats 
-	WHERE (@theaterId IS NULL OR (theaterID = @theaterID AND rowNumber = @rowNumber AND colNumber = @colNumber)) 
-		AND(@seatId IS NULL OR @SeatId = Id)		
-	SET @message = 'successful'
-	RETURN 200
-END TRY
-BEGIN CATCH
-	SET @message = ERROR_MESSAGE()
-	RETURN ERROR_NUMBER()
-END CATCH
+  BEGIN TRY
+  SELECT *
+  FROM Seats
+  WHERE @SeatId = Id
+  SET @message = 'successful'
+  RETURN 200
+  END TRY
+  BEGIN CATCH
+  SET @message = ERROR_MESSAGE()
+  RETURN ERROR_NUMBER()
+  END CATCH
 go
 
 CREATE PROCEDURE [dbo].[sp_DeleteSeat]
