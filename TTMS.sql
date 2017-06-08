@@ -411,6 +411,8 @@ BEGIN
 
   DECLARE @seatId INT
 
+  DECLARE @status INT
+
   DECLARE @theaterId INT
 
   SET @goodId = (SELECT inserted.Id
@@ -420,24 +422,27 @@ BEGIN
                     FROM Goods
                     WHERE Goods.Id = @goodId)
 
-  DECLARE cur_seatId CURSOR LOCAL READ_ONLY FORWARD_ONLY DYNAMIC FOR
-    SELECT Id
+  DECLARE cur_seat CURSOR LOCAL READ_ONLY FORWARD_ONLY DYNAMIC FOR
+    SELECT Id , status
     FROM TTMS.dbo.Seats
-    WHERE theaterID = @theaterId
-          AND status = 1 --万恶之源游标
-  OPEN cur_seatId --打开游标
+    WHERE theaterID = @theaterId --万恶之源游标
+  OPEN cur_seat
+
   WHILE @@FETCH_STATUS = 0
     BEGIN
 
-      FETCH NEXT FROM cur_seatId
-      INTO @seatId
+      FETCH NEXT FROM cur_seat
+      INTO @seatId , @status
 
-      INSERT INTO Tickets (status, seatID, goodID) VALUES (1, @seatId, @goodId)
+      IF (@status = 0)
+        INSERT INTO Tickets (status, seatID, goodID) VALUES (2, @seatId, @goodId)
+      IF (@status = 1)
+        INSERT INTO Tickets (status, seatID, goodID) VALUES (1, @seatId, @goodId)
 
     END
 
-  CLOSE cur_seatId
-  DEALLOCATE cur_seatId
+  CLOSE cur_seat
+  DEALLOCATE cur_seat
 END
 go
 
@@ -1247,37 +1252,41 @@ END CATCH
 go
 
 CREATE PROC sp_SelectTicket
-    @goodId  INT,
-    @message VARCHAR(30) OUTPUT
+  @goodId  INT,
+  @message VARCHAR(30) OUTPUT
 AS
-  BEGIN TRY
-  SELECT
-      Name = Programmes.proName,
-      Duration = Programmes.duration,
-      Tags = Programmes.tags,
-      Profile = Programmes.profile,
-      Performance = performance,
-      Date = playdate,
-      Price = price,
-      TheaterName = theaterName,
-      SeatRowNumber = rowNumber,
-      SeatColNumber = colNumber,
-      Status = (SELECT 1
-                WHERE DATEADD(MINUTE, 15, Tickets.time) < GETDATE()
-                      AND Tickets.status = 1)
-  FROM Tickets
-    JOIN Goods ON Tickets.goodID = Goods.Id
-    JOIN Programmes ON Goods.proID = Programmes.Id
-    JOIN Seats ON Tickets.seatID = Seats.Id
-    JOIN Theaters ON Goods.theaterID = Theaters.Id
-  WHERE @goodId = goodID
-  SET @message = 'successful'
-  RETURN 200
-  END TRY
-  BEGIN CATCH
-  SET @message = error_message()
-  RETURN ERROR_NUMBER()
-  END CATCH
+BEGIN TRY
+SELECT
+    Name = Programmes.proName,
+    Duration = Programmes.duration,
+    Tags = Programmes.tags,
+    Profile = Programmes.profile,
+    Performance = performance,
+    Date = playdate,
+    Price = price,
+    TheaterName = theaterName,
+    SeatRowNumber = rowNumber,
+    SeatColNumber = colNumber,
+    Status =
+           CASE
+           WHEN Tickets.status = 2
+             THEN 2
+           WHEN DATEADD(MINUTE, 15, Tickets.time) < GETDATE() AND Tickets.status = 1
+             THEN 1
+           ELSE 0 END
+FROM Tickets
+  JOIN Goods ON Tickets.goodID = Goods.Id
+  JOIN Programmes ON Goods.proID = Programmes.Id
+  JOIN Seats ON Tickets.seatID = Seats.Id
+  JOIN Theaters ON Goods.theaterID = Theaters.Id
+WHERE @goodId = goodID
+SET @message = 'successful'
+RETURN 200
+END TRY
+BEGIN CATCH
+SET @message = error_message()
+RETURN ERROR_NUMBER()
+END CATCH
 go
 
 CREATE PROC sp_ReturnedTicket
