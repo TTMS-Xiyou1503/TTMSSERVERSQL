@@ -428,16 +428,19 @@ BEGIN
     WHERE theaterID = @theaterId --万恶之源游标
   OPEN cur_seat
 
+  FETCH NEXT FROM cur_seat
+      INTO @seatId , @status
+
   WHILE @@FETCH_STATUS = 0
     BEGIN
-
-      FETCH NEXT FROM cur_seat
-      INTO @seatId , @status
 
       IF (@status = 0)
         INSERT INTO Tickets (status, seatID, goodID) VALUES (2, @seatId, @goodId)
       IF (@status = 1)
         INSERT INTO Tickets (status, seatID, goodID) VALUES (1, @seatId, @goodId)
+
+      FETCH NEXT FROM cur_seat
+      INTO @seatId , @status
 
     END
 
@@ -1273,7 +1276,8 @@ SELECT
              THEN 2
            WHEN DATEADD(MINUTE, 15, Tickets.time) < GETDATE() AND Tickets.status = 1
              THEN 1
-           ELSE 0 END
+           ELSE 0 END ,
+    Id = Tickets.Id
 FROM Tickets
   JOIN Goods ON Tickets.goodID = Goods.Id
   JOIN Programmes ON Goods.proID = Programmes.Id
@@ -1478,12 +1482,16 @@ AS
       WHERE @ticketId = Id
 
       -- 判断当票修改时间和现在时间差值超过15m 或者 票已经被付款  ，则超时
-      IF (DATEADD(MM, 15, @time) < GETDATE() OR @status = 0)
+      IF (DATEADD(MM, 15, @time) < GETDATE())
         BEGIN
           SET @message = 'time out'
           RETURN 401
         END
-
+      IF (@status = 0)
+        BEGIN
+          SET @message = 'the ticket is sold'
+          RETURN 401
+        END
       DECLARE @theaterId INT
       SET @theaterId = (SELECT theaterID
                         FROM Tickets
@@ -1495,6 +1503,7 @@ AS
       WHERE @ticketId = Id --更改票状态
 
       INSERT INTO Orders (ticketID, userID, type, time, theaterID)  --插入一条交易记录
+
       VALUES (@ticketId, @userId, 1, GETDATE(), @theaterID);
 
       SET @message = 'successful'
