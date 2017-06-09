@@ -111,18 +111,6 @@ BEGIN
 END
 go
 
-CREATE TRIGGER [dbo].[tr_adminLevel] ON [dbo].[Theaters]
-WITH EXECUTE AS CALLER
-AFTER INSERT, UPDATE
-AS
-DECLARE @adminID INT
-SELECT @adminID = theaterAdminId FROM inserted
-DECLARE @adminLevel nvarchar(15)
-SELECT @adminLevel = dbo.Users.userLevel FROM dbo.Users WHERE Users.Id = @adminId
-IF(@adminLevel <> N'剧院经理')
-	ROLLBACK TRANSACTION --回滚
-go
-
 CREATE TRIGGER [dbo].[tr_dropChild] ON [dbo].[Theaters]
 WITH EXECUTE AS CALLER
 INSTEAD OF DELETE
@@ -229,6 +217,23 @@ create table TTMS.dbo.Programmes
 	tags nvarchar(20),
 	profile text default N'无简介'
 )
+go
+
+CREATE TRIGGER tr_DeleteProgramme
+  ON Programmes
+INSTEAD OF DELETE
+AS
+  BEGIN
+    DECLARE @proId INT
+    SET @proId = (SELECT Id
+                  FROM deleted)
+    DELETE Goods
+    WHERE @proId = Goods.proID
+    DELETE PlayBills
+    WHERE @proId = PlayBills.programmeId
+    DELETE Programmes
+    WHERE @proId = Id
+  END
 go
 
 declare @sn nvarchar(30)
@@ -450,9 +455,9 @@ END
 go
 
 CREATE TRIGGER tr_dropTicket ON Goods
-  AFTER DELETE 
-  AS 
-  DELETE Tickets WHERE goodID = (SELECT Id FROM deleted)
+  AFTER DELETE
+  AS
+  DELETE Tickets WHERE goodID IN (SELECT Id FROM deleted)
 go
 
 declare @sn nvarchar(30)
@@ -559,70 +564,36 @@ END
 go
 
 CREATE PROCEDURE [dbo].[sp_CreateTheater]
-	@theaterName nvarchar(30), 
-	@location nvarchar(30),
-	@mapSite nvarchar(30),
-	@adminId int,
-	@seatRowsCount int,
-	@seatColsCount int,
-	@message varchar(30) OUTPUT
+  @theaterName   NVARCHAR(30),
+  @location      NVARCHAR(30),
+  @mapSite       NVARCHAR(30),
+  @seatRowsCount INT,
+  @seatColsCount INT,
+  @message       VARCHAR(30) OUTPUT
 AS
-IF EXISTS(SELECT 1 FROM dbo.Users WHERE Id = @adminId)
-BEGIN
-	IF NOT EXISTS(SELECT 1 FROM dbo.Theaters WHERE Theaters.theaterName = @theaterName)
-	BEGIN
-		INSERT INTO dbo.Theaters (
-			Theaters.theaterName , 
-			Theaters.theaterLocation , 
-			Theaters.theaterMapSite , 
-			Theaters.theaterAdminID , 
-			Theaters.seatRowCount , 
-			Theaters.seatColCount
-			)
-		VALUES (
-			@theaterName , @location , @mapSite , @adminId , @seatRowsCount , @seatColsCount
-		)
-		SET @message = 'successful'
-		RETURN 200
-	END
-	ELSE
-	BEGIN
-		SET @message = 'the theater is exists'
-		RETURN 400
-	END
-END
-ELSE
-BEGIN
-	SET @message = 'the user is not exists'
-	RETURN 404
-END
 
-go
-
-CREATE PROCEDURE [dbo].[sp_UpdateTheater]
-	@theaterId INT , 
-	@newAdminId int,
-	@message varchar(30) OUTPUT
-AS
-IF EXISTS(SELECT 1 FROM dbo.Users WHERE Id = @newAdminId)
-BEGIN
-	IF EXISTS(SELECT 1 FROM dbo.Theaters WHERE Theaters.Id = @theaterId)
-	BEGIN
-		UPDATE Theaters SET theaterAdminID = @newAdminId WHERE Theaters.Id = @theaterId
-		SET @message = 'successful'
-		RETURN 200
-	END
-	ELSE
-	BEGIN
-		SET @message = 'the theater is not exists'
-		RETURN 404
-	END
-END
+IF NOT EXISTS(SELECT 1
+              FROM dbo.Theaters
+              WHERE Theaters.theaterName = @theaterName)
+  BEGIN
+    INSERT INTO dbo.Theaters (
+      theaterName,
+      theaterLocation,
+      theaterMapSite,
+      seatRowCount,
+      seatColCount
+    )
+    VALUES (
+      @theaterName, @location, @mapSite, @seatRowsCount, @seatColsCount
+    )
+    SET @message = 'successful'
+    RETURN 200
+  END
 ELSE
-BEGIN
-	SET @message = 'the user is not exists'
-	RETURN 404
-END
+  BEGIN
+    SET @message = 'the theater is exists'
+    RETURN 400
+  END
 go
 
 CREATE PROCEDURE [dbo].[sp_DeleteUser]
@@ -1017,7 +988,6 @@ AS
 IF EXISTS(SELECT 1 FROM Programmes WHERE Id = @ProgrammeId)
 BEGIN
 	BEGIN TRY
-		EXEC sp_DeletePlayBill @programmeId , @message
 		DELETE Programmes WHERE Id = @ProgrammeId
 		SET @message = 'successful'
 		RETURN 204
@@ -1029,8 +999,8 @@ BEGIN
 END
 ELSE
 BEGIN
-	SET @message = 'the programme is not exists'
-	RETURN 404
+  SET @message = 'the programme is not exists'
+  RETURN 404
 END
 go
 
@@ -1127,8 +1097,8 @@ AS
   BEGIN TRY
   SELECT *
   FROM Goods
-  WHERE (@theaterId IS NULL OR theaterID = @theaterId)
-        AND (@programmeId IS NULL OR proID = @programmeId)
+  WHERE ((@theaterId IS NULL OR @theaterId = 0) OR theaterID = @theaterId)
+        AND ((@programmeId IS NULL  OR @programmeId = 0) OR proID = @programmeId)
         AND (@playDate IS NULL OR playDate = @playDate)
         AND (@performance IS NULL OR performance = @performance)
   SET @message = 'successful'
@@ -1362,8 +1332,8 @@ AS
   FROM Orders
     JOIN Tickets ON Orders.ticketID = Tickets.Id
     JOIN Goods ON Tickets.goodID = Goods.Id
-  WHERE (@theaterId IS NULL OR @theaterId = Orders.theaterID)
-        AND (@userId IS NULL OR @userId = userID)
+  WHERE ((@theaterId IS NULL OR @theaterId = 0) OR @theaterId = Orders.theaterID)
+        AND ((@userId IS NULL OR @userId = 0) OR @userId  = userID)
         AND (@playDate IS NULL OR @playDate = playdate)
         AND (@type IS NULL OR @type = type)
   SET @message = 'successful'
