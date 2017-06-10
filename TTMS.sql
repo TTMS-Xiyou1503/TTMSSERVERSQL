@@ -82,9 +82,6 @@ create table TTMS.dbo.Theaters
 			unique,
 	theaterLocation nvarchar(30) default N'中国' not null,
 	theaterMapSite nvarchar(30) default 'https://gaode.com',
-	theaterAdminID int default (-1)
-		constraint FK_Theaters_Users
-			references Users,
 	seatRowCount int default 0 not null,
 	seatColCount int default 0 not null
 )
@@ -143,11 +140,6 @@ go
 declare @sn nvarchar(30)
 set @sn = schema_name()
 execute sp_addextendedproperty N'MS_Description', N'影厅在地图上的位置', N'SCHEMA', @sn, N'TABLE', N'Theaters', N'COLUMN', N'theaterMapSite'
-go
-
-declare @sn nvarchar(30)
-set @sn = schema_name()
-execute sp_addextendedproperty N'MS_Description', N'影厅管理者的ID', N'SCHEMA', @sn, N'TABLE', N'Theaters', N'COLUMN', N'theaterAdminID'
 go
 
 declare @sn nvarchar(30)
@@ -848,32 +840,30 @@ END CATCH
 go
 
 CREATE PROCEDURE [dbo].[sp_QueryTheater]
-@theaterName nvarchar(30) = NULL,
-@theaterId INT = NULL ,
-@message varchar(30) OUTPUT
-as
-IF EXISTS(SELECT 1 FROM Theaters 
-	WHERE (@theaterName IS NULL OR theaterName = @theaterName)
-	AND (@theaterId = NULL OR Id = @theaterId))
-BEGIN
-	BEGIN TRY
-		select *
-		from Theaters 
-		WHERE (@theaterName IS NULL OR theaterName = @theaterName)
-			AND (@theaterId = NULL OR Id = @theaterId)
-		SET @message = 'successful'
-		RETURN 200
-	END TRY
-	BEGIN CATCH
-		SET @message = ERROR_MESSAGE()
-		RETURN ERROR_NUMBER()
-	END CATCH
-END
+  @theaterId INT = NULL,
+  @message   VARCHAR(30) OUTPUT
+AS
+IF EXISTS(SELECT 1
+          FROM Theaters
+          WHERE (@theaterId = NULL OR @theaterId = 0) OR Id = @theaterId)
+  BEGIN
+    BEGIN TRY
+    SELECT *
+    FROM Theaters
+    WHERE (@theaterId = NULL OR @theaterId = 0) OR Id = @theaterId
+    SET @message = 'successful'
+    RETURN 200
+    END TRY
+    BEGIN CATCH
+    SET @message = ERROR_MESSAGE()
+    RETURN ERROR_NUMBER()
+    END CATCH
+  END
 ELSE
-BEGIN
-	SET @message = 'the theater is not exists'
-	RETURN 404
-END
+  BEGIN
+    SET @message = 'the theater is not exists'
+    RETURN 404
+  END
 go
 
 CREATE PROCEDURE [dbo].[sp_DeleteTheater]
@@ -1293,7 +1283,7 @@ AS
           WHERE @ticketId = Id --更改票状态
 
           INSERT INTO Orders (ticketID, userID, type, time, theaterID)  --插入一条交易记录
-          VALUES (@ticketId, @userId, 0 , GETDATE(), @theaterID);
+          VALUES (@ticketId, @userId, -1 , GETDATE(), @theaterID);
 
           SET @message = 'successful'
           RETURN 200
@@ -1323,7 +1313,7 @@ go
 CREATE PROC sp_SelectOrder
     @theaterId INT = NULL,
     @userId    INT = NULL,
-    @playDate  DATE = NULL,
+    @tradeDate  DATE = NULL,
     @type      INT = NULL,
     @message   VARCHAR(30) OUTPUT
 AS
@@ -1334,8 +1324,8 @@ AS
     JOIN Goods ON Tickets.goodID = Goods.Id
   WHERE ((@theaterId IS NULL OR @theaterId = 0) OR @theaterId = Orders.theaterID)
         AND ((@userId IS NULL OR @userId = 0) OR @userId  = userID)
-        AND (@playDate IS NULL OR @playDate = playdate)
-        AND (@type IS NULL OR @type = type)
+        AND (@tradeDate IS NULL OR (@tradeDate <= Orders.time AND DATEADD(DAY , 1 , @tradeDate) > Orders.time))
+        AND ((@type IS NULL OR @type = 0) OR @type = type)
   SET @message = 'successful'
   RETURN 200
   END TRY
@@ -1538,6 +1528,48 @@ AS
   SET @message = ERROR_MESSAGE()
   RETURN ERROR_NUMBER()
   END CATCH
+go
+
+CREATE PROC sp_AnalyseOrder --售票分析
+    @userId      INT = NULL, -- 基于用户分析
+    @tradeDate   DATE = NULL, @dateLength INT = NULL, --基于日期分析
+    @programmeId INT = NULL, --基于售票分析
+    @theaterId INT = NULL , --基于影厅分析
+    @message     VARCHAR(30) OUTPUT
+AS
+  BEGIN
+    BEGIN TRY
+    SELECT
+        tradeTimes = COUNT(*),
+      --交易次数
+        sumPrice = SUM(Goods.price),
+      --交易总额
+        sumProfit = SUM
+        (
+            CASE Orders.type
+            WHEN 1
+              THEN Goods.price
+            WHEN -1
+              THEN (Goods.price * -1)
+            END
+        )
+      --盈利总额
+    FROM Orders
+      JOIN Tickets ON Orders.ticketID = Tickets.Id
+      JOIN Goods ON Tickets.goodID = Goods.Id
+    WHERE ((@programmeId IS NULL OR @programmeId = 0) OR @programmeId = Goods.proID)
+          AND (@tradeDate IS NULL OR (DATEADD(DAY, @dateLength , @tradeDate) > Orders.time AND @tradeDate < Orders.time))
+          AND ((@userId IS NULL OR @userId = 0) OR @userId = userID)
+          AND ((@theaterId IS NULL OR @theaterId = 0) OR @theaterId = Orders.theaterID)
+    SET @message = 'successful'
+    RETURN 200
+    END TRY
+    BEGIN CATCH
+    SET @message = ERROR_MESSAGE()
+    RETURN ERROR_NUMBER()
+    END CATCH
+
+  END
 go
 
 
