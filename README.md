@@ -2,4 +2,4 @@
 ---
 &emsp;&emsp;请拿到SSMS或者任意数据库客户端执行，数据库服务器必须是SQL Server
 
-&emsp;&rmsp;最终版本，短期内不再更新
+&emsp;&emsp;最终版本，短期内不再更新
